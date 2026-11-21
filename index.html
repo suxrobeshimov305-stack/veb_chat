@@ -97,12 +97,38 @@
     .dot { width: 8px; height: 8px; border-radius: 50%; background: #f59e0b; display: inline-block; }
     .dot.online { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
 
-    .header-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .header-actions { display: flex; gap: 6px; flex-shrink: 0; align-items: center; }
     .icon-btn {
       background: var(--bg-input); border: 1px solid var(--border); color: var(--text-main);
       padding: 7px 10px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 500;
+      display: flex; align-items: center; gap: 4px;
     }
     .icon-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+    /* Onlayn foydalanuvchilar paneli */
+    .users-drawer {
+      background: var(--bg-header);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    .users-drawer.hidden { display: none; }
+    .user-chip {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .user-chip .online-dot {
+      width: 7px; height: 7px; border-radius: 50%; background: #22c55e;
+    }
 
     .room-bar {
       background: var(--bg-header);
@@ -113,10 +139,12 @@
       align-items: center;
       font-size: 13px;
       flex-wrap: wrap;
+      justify-content: space-between;
     }
+    .room-left { display: flex; gap: 6px; align-items: center; }
     .room-bar input {
       background: var(--bg-input); border: 1px solid var(--border); color: var(--text-main);
-      padding: 6px 10px; border-radius: 8px; outline: none; font-size: 13px; width: 150px;
+      padding: 6px 10px; border-radius: 8px; outline: none; font-size: 13px; width: 130px;
     }
     .btn-sm {
       background: var(--primary); color: #fff; border: none; padding: 6px 12px;
@@ -132,6 +160,12 @@
       align-self: center; background: rgba(148, 163, 184, 0.18); color: var(--text-muted);
       font-size: 12px; padding: 5px 12px; border-radius: 20px; text-align: center; max-width: 90%;
     }
+    .admin-alert {
+      align-self: center; background: rgba(16, 185, 129, 0.16); color: #059669;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      font-size: 12px; font-weight: 600; padding: 6px 14px; border-radius: 20px; text-align: center;
+    }
+    body.dark .admin-alert { color: #34d399; }
 
     .msg-row { display: flex; flex-direction: column; max-width: 82%; animation: fadeIn 0.2s ease; }
     @media (min-width: 768px) { .msg-row { max-width: 68%; } }
@@ -141,6 +175,9 @@
     .msg-row.friend { align-self: flex-start; align-items: flex-start; }
 
     .sender-name { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; padding: 0 4px; }
+    .bubble-wrap { display: flex; align-items: center; gap: 6px; max-width: 100%; }
+    .msg-row.me .bubble-wrap { flex-direction: row-reverse; }
+
     .bubble {
       padding: 10px 14px; border-radius: 16px; font-size: 15px; line-height: 1.4;
       word-wrap: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.06);
@@ -148,66 +185,40 @@
     .me .bubble { background: var(--msg-me); color: var(--msg-me-text); border-bottom-right-radius: 4px; }
     .friend .bubble { background: var(--msg-friend); color: var(--msg-friend-text); border-bottom-left-radius: 4px; border: 1px solid var(--border); }
 
-    /* Stiker ko'rinishi */
+    .del-btn {
+      background: transparent; border: none; color: var(--text-muted);
+      cursor: pointer; font-size: 14px; padding: 4px; border-radius: 6px;
+      opacity: 0.65; transition: 0.15s; flex-shrink: 0;
+    }
+    .del-btn:hover { opacity: 1; color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+
     .sticker-bubble {
-      background: transparent !important;
-      border: none !important;
-      box-shadow: none !important;
-      padding: 2px 6px !important;
+      background: transparent !important; border: none !important; box-shadow: none !important; padding: 2px 6px !important;
     }
-    .sticker-emoji {
-      font-size: 64px;
-      line-height: 1.1;
-      display: block;
-      transition: transform 0.2s;
-    }
-    .sticker-emoji:hover { transform: scale(1.12); }
+    .sticker-emoji { font-size: 64px; line-height: 1.1; display: block; }
     .sticker-bubble .msg-time { color: var(--text-muted); }
 
     .bubble img, .bubble video {
-      max-width: 100%;
-      max-height: 280px;
-      border-radius: 10px;
-      display: block;
-      margin-bottom: 4px;
+      max-width: 100%; max-height: 280px; border-radius: 10px; display: block; margin-bottom: 4px;
     }
-
-    .bubble audio {
-      max-width: 230px;
-      height: 36px;
-      display: block;
-      margin-bottom: 4px;
-    }
+    .bubble audio { max-width: 230px; height: 36px; display: block; margin-bottom: 4px; }
 
     .file-link {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 8px 12px; border-radius: 10px;
-      background: rgba(0, 0, 0, 0.12); color: inherit;
-      text-decoration: none; font-size: 13px; font-weight: 500;
+      display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 10px;
+      background: rgba(0, 0, 0, 0.12); color: inherit; text-decoration: none; font-size: 13px; font-weight: 500;
     }
 
     .msg-time { font-size: 10px; opacity: 0.75; margin-top: 4px; text-align: right; display: block; }
 
-    /* Stikerlar paneli */
     .sticker-panel {
-      background: var(--bg-header);
-      border-top: 1px solid var(--border);
-      padding: 10px 14px;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
-      gap: 6px;
-      max-height: 180px;
-      overflow-y: auto;
+      background: var(--bg-header); border-top: 1px solid var(--border); padding: 10px 14px;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+      gap: 6px; max-height: 180px; overflow-y: auto;
     }
     .sticker-panel.hidden { display: none; }
     .sticker-item {
-      font-size: 32px;
-      text-align: center;
-      padding: 6px;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: background 0.15s, transform 0.15s;
-      user-select: none;
+      font-size: 32px; text-align: center; padding: 6px; border-radius: 12px;
+      cursor: pointer; transition: 0.15s; user-select: none;
     }
     .sticker-item:hover { background: var(--bg-input); transform: scale(1.15); }
 
@@ -217,16 +228,12 @@
     }
 
     .media-btn {
-      width: 38px; height: 38px; border-radius: 50%;
-      background: var(--bg-input); border: 1px solid var(--border);
-      color: var(--text-main); display: flex; align-items: center; justify-content: center;
-      cursor: pointer; flex-shrink: 0; font-size: 17px; transition: 0.2s;
+      width: 38px; height: 38px; border-radius: 50%; background: var(--bg-input);
+      border: 1px solid var(--border); color: var(--text-main); display: flex;
+      align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; font-size: 17px;
     }
     .media-btn:hover { border-color: var(--primary); color: var(--primary); }
-    .media-btn.recording {
-      background: #ef4444; color: #fff; border-color: #ef4444;
-      animation: pulse 1s infinite;
-    }
+    .media-btn.recording { background: #ef4444; color: #fff; border-color: #ef4444; animation: pulse 1s infinite; }
     @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); } }
 
     .footer input[type="text"] {
@@ -256,6 +263,10 @@
       background: var(--bg-input); color: var(--text-main); text-align: center; font-size: 16px; margin-bottom: 12px;
     }
     .modal-box button { width: 100%; padding: 11px; }
+    .admin-toggle {
+      margin-top: 12px; font-size: 12px; color: var(--text-muted); cursor: pointer; display: inline-block;
+    }
+    .admin-toggle:hover { color: var(--primary); }
   </style>
 </head>
 <body>
@@ -266,6 +277,7 @@
       <p>Suhbatda ko‘rinadigan ismingizni kiriting</p>
       <input type="text" id="username-input" placeholder="Masalan: Suxrob" maxlength="20" onkeypress="if(event.key==='Enter') saveUsername()">
       <button class="btn-sm" onclick="saveUsername()">Kirish</button>
+      <div class="admin-toggle" onclick="activateAdmin()" id="admin-status-link">👑 Admin sifatida kirish</div>
     </div>
   </div>
 
@@ -282,20 +294,26 @@
         </div>
       </div>
       <div class="header-actions">
-        <button class="icon-btn" onclick="changeName()">✏️ Ism</button>
-        <button class="icon-btn" onclick="toggleTheme()" id="theme-btn">🌙</button>
+        <button class="icon-btn" onclick="toggleUsersDrawer()" title="Kimlar bor">👥 <span id="online-count">1</span></button>
+        <button class="icon-btn" onclick="changeName()" title="Ism">✏️</button>
+        <button class="icon-btn" onclick="toggleTheme()" id="theme-btn" title="Mavzu">🌙</button>
       </div>
     </div>
 
+    <!-- Hozir chatda kimlar borligi ro'yxati -->
+    <div class="users-drawer hidden" id="users-drawer"></div>
+
     <div class="room-bar">
-      <span>Xona:</span>
-      <input type="text" id="room-input" value="umumiy" placeholder="Xona nomi">
-      <button class="btn-sm" onclick="switchRoom()">O‘tish</button>
+      <div class="room-left">
+        <span>Xona:</span>
+        <input type="text" id="room-input" value="umumiy" placeholder="Xona nomi">
+        <button class="btn-sm" onclick="switchRoom()">O‘tish</button>
+      </div>
+      <span id="admin-badge" style="font-size:11px; color:#10b981; font-weight:600; display:none;">👑 Admin rejimi</span>
     </div>
 
     <div id="chat-box"></div>
 
-    <!-- Stikerlar paneli -->
     <div class="sticker-panel hidden" id="sticker-panel"></div>
 
     <div class="footer">
@@ -312,6 +330,8 @@
   </div>
 
   <script>
+    const ADMIN_PASS = "2026"; // Admin paroli
+    let isAdmin = localStorage.getItem("chat_is_admin") === "true";
     let myName = localStorage.getItem("chat_username") || "";
     const myClientId = "user_" + Math.random().toString(36).substring(2, 10);
     let currentRoom = "umumiy";
@@ -319,6 +339,7 @@
     let mediaRecorder = null;
     let audioChunks = [];
     let isRecording = false;
+    let onlineUsers = {}; // { clientId: { name, lastSeen } }
 
     const stickers = [
       "😀", "😂", "🤣", "😍", "🥰", "😎", "🤩", "🥳",
@@ -331,7 +352,6 @@
     const statusDot = document.getElementById("status-dot");
     const statusLabel = document.getElementById("status-label");
 
-    // Stikerlar panelini to'ldirish
     const stickerPanel = document.getElementById("sticker-panel");
     stickers.forEach(emoji => {
       const span = document.createElement("div");
@@ -346,9 +366,42 @@
       document.getElementById("theme-btn").innerText = "☀️";
     }
 
+    updateAdminUI();
+
     if (myName) {
       document.getElementById("name-modal").classList.add("hidden");
       startChat();
+    }
+
+    function activateAdmin() {
+      if (isAdmin) {
+        isAdmin = false;
+        localStorage.removeItem("chat_is_admin");
+        updateAdminUI();
+        alert("Admin rejimi o‘chirildi.");
+        return;
+      }
+      const pass = prompt("Admin parolini kiriting:");
+      if (pass === ADMIN_PASS) {
+        isAdmin = true;
+        localStorage.setItem("chat_is_admin", "true");
+        updateAdminUI();
+        alert("Admin rejimi yoqildi! Endi kim kirganini faqat siz ko‘rasiz.");
+      } else if (pass !== null) {
+        alert("Parol noto‘g‘ri!");
+      }
+    }
+
+    function updateAdminUI() {
+      const link = document.getElementById("admin-status-link");
+      const badge = document.getElementById("admin-badge");
+      if (isAdmin) {
+        link.innerText = "✅ Admin rejimi faol (o‘chirish)";
+        badge.style.display = "inline";
+      } else {
+        link.innerText = "👑 Admin sifatida kirish";
+        badge.style.display = "none";
+      }
     }
 
     function saveUsername() {
@@ -368,9 +421,19 @@
       stickerPanel.classList.toggle("hidden");
     }
 
+    function toggleUsersDrawer() {
+      document.getElementById("users-drawer").classList.toggle("hidden");
+    }
+
     function startChat() {
       document.getElementById("header-avatar").innerText = myName.charAt(0).toUpperCase();
-      if (client) return;
+      onlineUsers[myClientId] = { name: myName + " (Siz)", lastSeen: Date.now() };
+      renderUsersList();
+
+      if (client) {
+        announcePresence("join");
+        return;
+      }
 
       client = mqtt.connect("wss://broker.emqx.io:8084/mqtt");
 
@@ -388,10 +451,85 @@
       client.on("message", (topic, payload) => {
         try {
           const data = JSON.parse(payload.toString());
+
+          // Xabar o'chirish buyrug'i
+          if (data.type === "delete") {
+            const targetRow = document.getElementById("msg_" + data.msgId);
+            if (targetRow) targetRow.remove();
+            return;
+          }
+
+          // Foydalanuvchi holati (kirish / ping)
+          if (data.type === "presence") {
+            if (data.clientId === myClientId) return;
+            const isNewUser = !onlineUsers[data.clientId];
+            onlineUsers[data.clientId] = { name: data.sender, lastSeen: Date.now() };
+            renderUsersList();
+
+            // Agar yangi odam kirgan bo'lsa
+            if (data.action === "join" || isNewUser) {
+              // O'zimiz ham borligimizni unga bildiramiz
+              announcePresence("ping");
+              // Faqat Adminga bildirishnoma chiqadi!
+              if (isAdmin) {
+                addAdminAlert(`👑 ${data.sender} chatga kirdi (${getTimeNow()})`);
+                playBeep();
+              }
+            }
+            return;
+          }
+
           if (data.clientId === myClientId) return;
+          onlineUsers[data.clientId] = { name: data.sender, lastSeen: Date.now() };
+          renderUsersList();
           renderMessage(data, "friend");
           playBeep();
         } catch (e) {}
+      });
+
+      // Har 10 soniyada faollikni yangilash va chiqib ketganlarni tozalash
+      setInterval(() => {
+        if (client && client.connected) {
+          announcePresence("ping");
+        }
+        const now = Date.now();
+        let changed = false;
+        for (const id in onlineUsers) {
+          if (id !== myClientId && now - onlineUsers[id].lastSeen > 25000) {
+            if (isAdmin) {
+              addAdminAlert(`🚪 ${onlineUsers[id].name} chatdan chiqdi`);
+            }
+            delete onlineUsers[id];
+            changed = true;
+          }
+        }
+        if (changed) renderUsersList();
+      }, 10000);
+    }
+
+    function announcePresence(action) {
+      if (!client || !client.connected) return;
+      const payload = JSON.stringify({
+        type: "presence",
+        action: action,
+        clientId: myClientId,
+        sender: myName
+      });
+      client.publish("suxrob_media_chat_2026/" + currentRoom.toLowerCase(), payload);
+    }
+
+    function renderUsersList() {
+      const drawer = document.getElementById("users-drawer");
+      const countEl = document.getElementById("online-count");
+      drawer.innerHTML = "";
+      const ids = Object.keys(onlineUsers);
+      countEl.innerText = ids.length;
+
+      ids.forEach(id => {
+        const chip = document.createElement("div");
+        chip.className = "user-chip";
+        chip.innerHTML = `<span class="online-dot"></span><span>${onlineUsers[id].name}</span>`;
+        drawer.appendChild(chip);
       });
     }
 
@@ -399,7 +537,11 @@
       const topic = "suxrob_media_chat_2026/" + roomName.toLowerCase();
       client.subscribe(topic);
       document.getElementById("room-title").innerText = "Xona: #" + roomName;
-      addSysMsg(`"${roomName}" xonasiga ulandingiz. Matn, stiker, ovoz, rasm va video yuborishingiz mumkin.`);
+      onlineUsers = {};
+      onlineUsers[myClientId] = { name: myName + " (Siz)", lastSeen: Date.now() };
+      renderUsersList();
+      announcePresence("join");
+      addSysMsg(`"${roomName}" xonasiga ulandingiz.`);
     }
 
     function switchRoom() {
@@ -421,12 +563,25 @@
         alert("Serverga ulanish kutilmoqda...");
         return false;
       }
+      dataObj.msgId = Date.now() + "_" + Math.random().toString(36).substring(2, 6);
       dataObj.clientId = myClientId;
       dataObj.sender = myName;
       dataObj.time = getTimeNow();
       client.publish("suxrob_media_chat_2026/" + currentRoom.toLowerCase(), JSON.stringify(dataObj));
       renderMessage(dataObj, "me");
       return true;
+    }
+
+    function deleteMessage(msgId) {
+      if (!confirm("Bu xabarni hamma uchun o‘chirasizmi?")) return;
+      const el = document.getElementById("msg_" + msgId);
+      if (el) el.remove();
+      if (client && client.connected) {
+        client.publish("suxrob_media_chat_2026/" + currentRoom.toLowerCase(), JSON.stringify({
+          type: "delete",
+          msgId: msgId
+        }));
+      }
     }
 
     function sendTextMsg() {
@@ -444,7 +599,6 @@
       stickerPanel.classList.add("hidden");
     }
 
-    // Ovozli xabar yozish va yuborish
     async function toggleVoiceRecord() {
       const micBtn = document.getElementById("mic-btn");
       if (!isRecording) {
@@ -452,27 +606,20 @@
           const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
           mediaRecorder = new MediaRecorder(stream);
           audioChunks = [];
-
-          mediaRecorder.ondataavailable = e => {
-            if (e.data.size > 0) audioChunks.push(e.data);
-          };
-
+          mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
           mediaRecorder.onstop = () => {
             const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
             const reader = new FileReader();
-            reader.onloadend = () => {
-              publishPayload({ type: "audio", content: reader.result });
-            };
+            reader.onloadend = () => publishPayload({ type: "audio", content: reader.result });
             reader.readAsDataURL(audioBlob);
             stream.getTracks().forEach(track => track.stop());
           };
-
           mediaRecorder.start();
           isRecording = true;
           micBtn.classList.add("recording");
           micBtn.innerText = "⏹️";
         } catch (err) {
-          alert("Mikrofonga ruxsat berilmadi yoki qurilmada mikrofon topilmadi.");
+          alert("Mikrofonga ruxsat berilmadi.");
         }
       } else {
         mediaRecorder.stop();
@@ -482,21 +629,16 @@
       }
     }
 
-    // Rasm, Video va Fayl yuklash
     function handleFileUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
-
       if (file.size > 3 * 1024 * 1024) {
         alert("Fayl hajmi 3 MB dan oshmasligi kerak!");
         event.target.value = "";
         return;
       }
-
       if (file.type.startsWith("image/")) {
-        compressImage(file, (base64Img) => {
-          publishPayload({ type: "image", content: base64Img });
-        });
+        compressImage(file, (base64Img) => publishPayload({ type: "image", content: base64Img }));
       } else if (file.type.startsWith("video/")) {
         const reader = new FileReader();
         reader.onload = () => publishPayload({ type: "video", content: reader.result });
@@ -531,10 +673,14 @@
     function renderMessage(data, who) {
       const row = document.createElement("div");
       row.className = "msg-row " + who;
+      if (data.msgId) row.id = "msg_" + data.msgId;
 
       const nameEl = document.createElement("div");
       nameEl.className = "sender-name";
       nameEl.innerText = who === "me" ? "Siz" : data.sender;
+
+      const bubbleWrap = document.createElement("div");
+      bubbleWrap.className = "bubble-wrap";
 
       const bubble = document.createElement("div");
       bubble.className = "bubble";
@@ -578,8 +724,20 @@
       timeEl.innerText = data.time;
       bubble.appendChild(timeEl);
 
+      bubbleWrap.appendChild(bubble);
+
+      // O'z xabarini (yoki Admin bo'lsa hamma xabarni) o'chirish tugmasi
+      if ((who === "me" || isAdmin) && data.msgId) {
+        const delBtn = document.createElement("button");
+        delBtn.className = "del-btn";
+        delBtn.innerText = "🗑️";
+        delBtn.title = "Xabarni hamma uchun o‘chirish";
+        delBtn.onclick = () => deleteMessage(data.msgId);
+        bubbleWrap.appendChild(delBtn);
+      }
+
       row.appendChild(nameEl);
-      row.appendChild(bubble);
+      row.appendChild(bubbleWrap);
       chatBox.appendChild(row);
       chatBox.scrollTop = chatBox.scrollHeight;
     }
@@ -587,6 +745,14 @@
     function addSysMsg(text) {
       const div = document.createElement("div");
       div.className = "sys-msg";
+      div.innerText = text;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function addAdminAlert(text) {
+      const div = document.createElement("div");
+      div.className = "admin-alert";
       div.innerText = text;
       chatBox.appendChild(div);
       chatBox.scrollTop = chatBox.scrollHeight;
