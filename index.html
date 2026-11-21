@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Universal Media Veb Chat</title>
+  <title>Rasmiy Guruh Chati</title>
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
   <style>
     :root {
@@ -105,7 +105,6 @@
     }
     .icon-btn:hover { border-color: var(--primary); color: var(--primary); }
 
-    /* Onlayn foydalanuvchilar paneli */
     .users-drawer {
       background: var(--bg-header);
       border-bottom: 1px solid var(--border);
@@ -126,25 +125,23 @@
       align-items: center;
       gap: 6px;
     }
-    .user-chip .online-dot {
-      width: 7px; height: 7px; border-radius: 50%; background: #22c55e;
-    }
+    .online-dot { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; }
+    .offline-dot { width: 7px; height: 7px; border-radius: 50%; background: #94a3b8; }
 
-    .room-bar {
-      background: var(--bg-header);
-      padding: 8px 16px;
+    .admin-bar {
+      background: rgba(16, 185, 129, 0.08);
+      padding: 7px 16px;
       border-bottom: 1px solid var(--border);
-      display: flex;
+      display: none;
       gap: 8px;
       align-items: center;
-      font-size: 13px;
-      flex-wrap: wrap;
+      font-size: 12px;
       justify-content: space-between;
     }
-    .room-left { display: flex; gap: 6px; align-items: center; }
-    .room-bar input {
+    .admin-bar.active { display: flex; }
+    .admin-bar input {
       background: var(--bg-input); border: 1px solid var(--border); color: var(--text-main);
-      padding: 6px 10px; border-radius: 8px; outline: none; font-size: 13px; width: 130px;
+      padding: 5px 8px; border-radius: 6px; outline: none; font-size: 12px; width: 120px;
     }
     .btn-sm {
       background: var(--primary); color: #fff; border: none; padding: 6px 12px;
@@ -248,45 +245,44 @@
     }
 
     .modal-overlay {
-      position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px);
+      position: fixed; inset: 0; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(6px);
       display: flex; align-items: center; justify-content: center; z-index: 100; padding: 16px;
     }
     .modal-overlay.hidden { display: none; }
     .modal-box {
       background: var(--bg-app); padding: 24px; border-radius: 16px; width: 100%;
-      max-width: 350px; text-align: center; border: 1px solid var(--border);
+      max-width: 360px; text-align: center; border: 1px solid var(--border);
     }
     .modal-box h3 { margin-bottom: 8px; }
     .modal-box p { color: var(--text-muted); font-size: 13px; margin-bottom: 14px; }
     .modal-box input {
-      width: 100%; padding: 10px; border-radius: 10px; border: 1px solid var(--border);
+      width: 100%; padding: 11px; border-radius: 10px; border: 1px solid var(--border);
       background: var(--bg-input); color: var(--text-main); text-align: center; font-size: 16px; margin-bottom: 12px;
     }
     .modal-box button { width: 100%; padding: 11px; }
     .admin-toggle {
-      margin-top: 12px; font-size: 12px; color: var(--text-muted); cursor: pointer; display: inline-block;
+      margin-top: 14px; font-size: 12px; color: var(--text-muted); cursor: pointer; display: inline-block;
     }
-    .admin-toggle:hover { color: var(--primary); }
   </style>
 </head>
 <body>
 
   <div class="modal-overlay" id="name-modal">
     <div class="modal-box">
-      <h3>Chatga xush kelibsiz</h3>
-      <p>Suhbatda ko‘rinadigan ismingizni kiriting</p>
-      <input type="text" id="username-input" placeholder="Masalan: Suxrob" maxlength="20" onkeypress="if(event.key==='Enter') saveUsername()">
-      <button class="btn-sm" onclick="saveUsername()">Kirish</button>
-      <div class="admin-toggle" onclick="activateAdmin()" id="admin-status-link">👑 Admin sifatida kirish</div>
+      <h3>Guruhga qo‘shilish</h3>
+      <p>Guruhda ko‘rinishi uchun o‘z ismingizni yozing</p>
+      <input type="text" id="username-input" placeholder="Ismingiz (masalan: Jasur)" maxlength="25" onkeypress="if(event.key==='Enter') joinGroupForever()">
+      <button class="btn-sm" onclick="joinGroupForever()">Guruhga qo‘shilish</button>
+      <div class="admin-toggle" onclick="activateAdmin()" id="admin-status-link">👑 Admin</div>
     </div>
   </div>
 
   <div class="app-container">
     <div class="header">
       <div class="user-info">
-        <div class="avatar" id="header-avatar">S</div>
+        <div class="avatar" id="header-avatar">G</div>
         <div class="title-area">
-          <h2 id="room-title">Umumiy Chat</h2>
+          <h2 id="room-title">Rasmiy Guruh</h2>
           <div class="status-text">
             <span class="dot" id="status-dot"></span>
             <span id="status-label">Ulanmoqda...</span>
@@ -294,22 +290,20 @@
         </div>
       </div>
       <div class="header-actions">
-        <button class="icon-btn" onclick="toggleUsersDrawer()" title="Kimlar bor">👥 <span id="online-count">1</span></button>
-        <button class="icon-btn" onclick="changeName()" title="Ism">✏️</button>
+        <button class="icon-btn" onclick="toggleUsersDrawer()" title="Guruh a'zolari">👥 <span id="online-count">1</span></button>
         <button class="icon-btn" onclick="toggleTheme()" id="theme-btn" title="Mavzu">🌙</button>
       </div>
     </div>
 
-    <!-- Hozir chatda kimlar borligi ro'yxati -->
     <div class="users-drawer hidden" id="users-drawer"></div>
 
-    <div class="room-bar">
-      <div class="room-left">
-        <span>Xona:</span>
-        <input type="text" id="room-input" value="umumiy" placeholder="Xona nomi">
-        <button class="btn-sm" onclick="switchRoom()">O‘tish</button>
+    <div class="admin-bar" id="admin-bar">
+      <span>👑 Admin nazorati</span>
+      <div style="display:flex; gap:5px;">
+        <input type="text" id="room-input" value="umumiy" placeholder="Xona">
+        <button class="btn-sm" style="padding:4px 8px; font-size:12px;" onclick="switchRoom()">O‘tish</button>
+        <button class="btn-sm" style="padding:4px 8px; font-size:12px; background:#ef4444;" onclick="clearMembersList()" title="Ro'yxatni tozalash">Tozalash</button>
       </div>
-      <span id="admin-badge" style="font-size:11px; color:#10b981; font-weight:600; display:none;">👑 Admin rejimi</span>
     </div>
 
     <div id="chat-box"></div>
@@ -330,16 +324,39 @@
   </div>
 
   <script>
-    const ADMIN_PASS = "2026"; // Admin paroli
+    const ADMIN_PASS = "2026";
     let isAdmin = localStorage.getItem("chat_is_admin") === "true";
-    let myName = localStorage.getItem("chat_username") || "";
-    const myClientId = "user_" + Math.random().toString(36).substring(2, 10);
-    let currentRoom = "umumiy";
+
+    // Eski "Mehmon" xotirasini tozalash
+    if (localStorage.getItem("chat_username") === "Mehmon") {
+      localStorage.removeItem("chat_username");
+    }
+
+    let myName = localStorage.getItem("chat_locked_username") || "";
+    if (myName.toLowerCase() === "mehmon") {
+      myName = "";
+      localStorage.removeItem("chat_locked_username");
+    }
+
+    let myClientId = localStorage.getItem("chat_permanent_id");
+    if (!myClientId) {
+      myClientId = "member_" + Date.now() + "_" + Math.random().toString(36).substring(2, 7);
+      localStorage.setItem("chat_permanent_id", myClientId);
+    }
+
+    let currentRoom = localStorage.getItem("chat_locked_room") || "umumiy";
     let client = null;
     let mediaRecorder = null;
     let audioChunks = [];
     let isRecording = false;
-    let onlineUsers = {}; // { clientId: { name, lastSeen } }
+
+    // A'zolar ro'yxatidan eski "Mehmon" yozuvlarini olib tashlash
+    let groupMembers = JSON.parse(localStorage.getItem("chat_group_members") || "{}");
+    for (const id in groupMembers) {
+      if (!groupMembers[id].name || groupMembers[id].name.toLowerCase().includes("mehmon")) {
+        delete groupMembers[id];
+      }
+    }
 
     const stickers = [
       "😀", "😂", "🤣", "😍", "🥰", "😎", "🤩", "🥳",
@@ -351,6 +368,18 @@
     const chatBox = document.getElementById("chat-box");
     const statusDot = document.getElementById("status-dot");
     const statusLabel = document.getElementById("status-label");
+
+    window.addEventListener("beforeunload", (e) => {
+      if (myName && !isAdmin) {
+        e.preventDefault();
+        e.returnValue = "Siz guruh a'zosisiz. Chiqishni tasdiqlaysizmi?";
+      }
+    });
+
+    history.pushState(null, null, location.href);
+    window.onpopstate = function () {
+      history.go(1);
+    };
 
     const stickerPanel = document.getElementById("sticker-panel");
     stickers.forEach(emoji => {
@@ -371,50 +400,54 @@
     if (myName) {
       document.getElementById("name-modal").classList.add("hidden");
       startChat();
+    } else {
+      document.getElementById("username-input").focus();
     }
 
     function activateAdmin() {
-      if (isAdmin) {
-        isAdmin = false;
-        localStorage.removeItem("chat_is_admin");
-        updateAdminUI();
-        alert("Admin rejimi o‘chirildi.");
-        return;
-      }
       const pass = prompt("Admin parolini kiriting:");
       if (pass === ADMIN_PASS) {
         isAdmin = true;
         localStorage.setItem("chat_is_admin", "true");
         updateAdminUI();
-        alert("Admin rejimi yoqildi! Endi kim kirganini faqat siz ko‘rasiz.");
+        alert("Admin rejimi faollashtirildi!");
       } else if (pass !== null) {
         alert("Parol noto‘g‘ri!");
       }
     }
 
     function updateAdminUI() {
+      const bar = document.getElementById("admin-bar");
       const link = document.getElementById("admin-status-link");
-      const badge = document.getElementById("admin-badge");
       if (isAdmin) {
-        link.innerText = "✅ Admin rejimi faol (o‘chirish)";
-        badge.style.display = "inline";
-      } else {
-        link.innerText = "👑 Admin sifatida kirish";
-        badge.style.display = "none";
+        bar.classList.add("active");
+        if (link) link.innerText = "✅ Admin tasdiqlandi";
       }
     }
 
-    function saveUsername() {
-      const val = document.getElementById("username-input").value.trim();
-      myName = val || "Mehmon";
-      localStorage.setItem("chat_username", myName);
-      document.getElementById("name-modal").classList.add("hidden");
-      startChat();
+    function clearMembersList() {
+      if (!isAdmin) return;
+      groupMembers = {};
+      groupMembers[myClientId] = { name: myName + " (Siz)", lastSeen: Date.now(), online: true };
+      saveAndRenderMembers();
+      announcePresence("ping");
     }
 
-    function changeName() {
-      document.getElementById("username-input").value = myName;
-      document.getElementById("name-modal").classList.remove("hidden");
+    function joinGroupForever() {
+      const val = document.getElementById("username-input").value.trim();
+      if (val.length < 2) {
+        alert("Iltimos, kamida 2 ta harfdan iborat haqiqiy ismingizni yozing!");
+        return;
+      }
+      if (val.toLowerCase() === "mehmon") {
+        alert("Iltimos, o‘z ismingizni kiriting!");
+        return;
+      }
+      myName = val;
+      localStorage.setItem("chat_locked_username", myName);
+      localStorage.setItem("chat_locked_room", currentRoom);
+      document.getElementById("name-modal").classList.add("hidden");
+      startChat();
     }
 
     function toggleStickers() {
@@ -427,19 +460,16 @@
 
     function startChat() {
       document.getElementById("header-avatar").innerText = myName.charAt(0).toUpperCase();
-      onlineUsers[myClientId] = { name: myName + " (Siz)", lastSeen: Date.now() };
-      renderUsersList();
+      groupMembers[myClientId] = { name: myName + " (Siz)", lastSeen: Date.now(), online: true };
+      saveAndRenderMembers();
 
-      if (client) {
-        announcePresence("join");
-        return;
-      }
+      if (client) return;
 
       client = mqtt.connect("wss://broker.emqx.io:8084/mqtt");
 
       client.on("connect", () => {
         statusDot.classList.add("online");
-        statusLabel.innerText = "Onlayn";
+        statusLabel.innerText = "Guruhda (Onlayn)";
         subscribeRoom(currentRoom);
       });
 
@@ -452,27 +482,26 @@
         try {
           const data = JSON.parse(payload.toString());
 
-          // Xabar o'chirish buyrug'i
           if (data.type === "delete") {
             const targetRow = document.getElementById("msg_" + data.msgId);
             if (targetRow) targetRow.remove();
             return;
           }
 
-          // Foydalanuvchi holati (kirish / ping)
           if (data.type === "presence") {
             if (data.clientId === myClientId) return;
-            const isNewUser = !onlineUsers[data.clientId];
-            onlineUsers[data.clientId] = { name: data.sender, lastSeen: Date.now() };
-            renderUsersList();
+            const validName = (data.sender && data.sender.trim()) ? data.sender.trim() : "Foydalanuvchi";
+            const isBrandNew = !groupMembers[data.clientId];
+            const wasOffline = groupMembers[data.clientId] && !groupMembers[data.clientId].online;
 
-            // Agar yangi odam kirgan bo'lsa
-            if (data.action === "join" || isNewUser) {
-              // O'zimiz ham borligimizni unga bildiramiz
+            groupMembers[data.clientId] = { name: validName, lastSeen: Date.now(), online: true };
+            saveAndRenderMembers();
+
+            if (data.action === "join" || isBrandNew || wasOffline) {
               announcePresence("ping");
-              // Faqat Adminga bildirishnoma chiqadi!
               if (isAdmin) {
-                addAdminAlert(`👑 ${data.sender} chatga kirdi (${getTimeNow()})`);
+                const statusWord = isBrandNew ? "guruhga yangi qo‘shildi" : "guruhga kirdi";
+                addAdminAlert(`👑 ${validName} ${statusWord} (${getTimeNow()})`);
                 playBeep();
               }
             }
@@ -480,75 +509,74 @@
           }
 
           if (data.clientId === myClientId) return;
-          onlineUsers[data.clientId] = { name: data.sender, lastSeen: Date.now() };
-          renderUsersList();
-          renderMessage(data, "friend");
+          const senderName = (data.sender && data.sender.trim()) ? data.sender.trim() : "Foydalanuvchi";
+          groupMembers[data.clientId] = { name: senderName, lastSeen: Date.now(), online: true };
+          saveAndRenderMembers();
+          renderMessage({ ...data, sender: senderName }, "friend");
           playBeep();
         } catch (e) {}
       });
 
-      // Har 10 soniyada faollikni yangilash va chiqib ketganlarni tozalash
       setInterval(() => {
         if (client && client.connected) {
           announcePresence("ping");
         }
         const now = Date.now();
         let changed = false;
-        for (const id in onlineUsers) {
-          if (id !== myClientId && now - onlineUsers[id].lastSeen > 25000) {
-            if (isAdmin) {
-              addAdminAlert(`🚪 ${onlineUsers[id].name} chatdan chiqdi`);
-            }
-            delete onlineUsers[id];
+        for (const id in groupMembers) {
+          if (id !== myClientId && groupMembers[id].online && now - groupMembers[id].lastSeen > 25000) {
+            groupMembers[id].online = false;
             changed = true;
           }
         }
-        if (changed) renderUsersList();
-      }, 10000);
+        if (changed) saveAndRenderMembers();
+      }, 8000);
     }
 
     function announcePresence(action) {
-      if (!client || !client.connected) return;
-      const payload = JSON.stringify({
+      if (!client || !client.connected || !myName) return;
+      client.publish("suxrob_permanent_group_2026/" + currentRoom.toLowerCase(), JSON.stringify({
         type: "presence",
         action: action,
         clientId: myClientId,
         sender: myName
-      });
-      client.publish("suxrob_media_chat_2026/" + currentRoom.toLowerCase(), payload);
+      }));
     }
 
-    function renderUsersList() {
+    function saveAndRenderMembers() {
+      localStorage.setItem("chat_group_members", JSON.stringify(groupMembers));
       const drawer = document.getElementById("users-drawer");
       const countEl = document.getElementById("online-count");
       drawer.innerHTML = "";
-      const ids = Object.keys(onlineUsers);
-      countEl.innerText = ids.length;
+      const ids = Object.keys(groupMembers);
+      const onlineCount = ids.filter(id => groupMembers[id].online).length;
+      countEl.innerText = `${onlineCount}/${ids.length}`;
 
       ids.forEach(id => {
+        const m = groupMembers[id];
         const chip = document.createElement("div");
         chip.className = "user-chip";
-        chip.innerHTML = `<span class="online-dot"></span><span>${onlineUsers[id].name}</span>`;
+        const dotClass = m.online ? "online-dot" : "offline-dot";
+        chip.innerHTML = `<span class="${dotClass}"></span><span>${m.name}</span>`;
         drawer.appendChild(chip);
       });
     }
 
     function subscribeRoom(roomName) {
-      const topic = "suxrob_media_chat_2026/" + roomName.toLowerCase();
+      const topic = "suxrob_permanent_group_2026/" + roomName.toLowerCase();
       client.subscribe(topic);
-      document.getElementById("room-title").innerText = "Xona: #" + roomName;
-      onlineUsers = {};
-      onlineUsers[myClientId] = { name: myName + " (Siz)", lastSeen: Date.now() };
-      renderUsersList();
+      document.getElementById("room-title").innerText = "Guruh: #" + roomName;
       announcePresence("join");
-      addSysMsg(`"${roomName}" xonasiga ulandingiz.`);
+      addSysMsg(`Siz "${roomName}" guruhining doimiy a'zosisiz.`);
     }
 
     function switchRoom() {
+      if (!isAdmin) return;
       const newRoom = document.getElementById("room-input").value.trim().replace(/\s+/g, "_");
       if (!newRoom || newRoom === currentRoom) return;
-      client.unsubscribe("suxrob_media_chat_2026/" + currentRoom.toLowerCase());
+      client.unsubscribe("suxrob_permanent_group_2026/" + currentRoom.toLowerCase());
       currentRoom = newRoom;
+      localStorage.setItem("chat_locked_room", currentRoom);
       chatBox.innerHTML = "";
       subscribeRoom(currentRoom);
     }
@@ -567,7 +595,7 @@
       dataObj.clientId = myClientId;
       dataObj.sender = myName;
       dataObj.time = getTimeNow();
-      client.publish("suxrob_media_chat_2026/" + currentRoom.toLowerCase(), JSON.stringify(dataObj));
+      client.publish("suxrob_permanent_group_2026/" + currentRoom.toLowerCase(), JSON.stringify(dataObj));
       renderMessage(dataObj, "me");
       return true;
     }
@@ -577,7 +605,7 @@
       const el = document.getElementById("msg_" + msgId);
       if (el) el.remove();
       if (client && client.connected) {
-        client.publish("suxrob_media_chat_2026/" + currentRoom.toLowerCase(), JSON.stringify({
+        client.publish("suxrob_permanent_group_2026/" + currentRoom.toLowerCase(), JSON.stringify({
           type: "delete",
           msgId: msgId
         }));
@@ -726,7 +754,6 @@
 
       bubbleWrap.appendChild(bubble);
 
-      // O'z xabarini (yoki Admin bo'lsa hamma xabarni) o'chirish tugmasi
       if ((who === "me" || isAdmin) && data.msgId) {
         const delBtn = document.createElement("button");
         delBtn.className = "del-btn";
