@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Real-Time Veb Chat</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 520px; margin: 20px auto; background: #eef2f5; padding: 0 10px; }
+    h3 { text-align: center; color: #1e293b; }
+    #chat-box { height: 420px; overflow-y: auto; border: 1px solid #cbd5e1; padding: 15px; background: #fff; border-radius: 12px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+    .msg { padding: 8px 12px; background: #e0f2fe; border-radius: 8px; max-width: 80%; word-wrap: break-word; }
+    .msg b { color: #0369a1; display: block; font-size: 13px; margin-bottom: 2px; }
+    .controls { display: flex; gap: 6px; margin-top: 12px; }
+    input { padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; }
+    input:focus { border-color: #0284c7; }
+    #username { width: 28%; }
+    #message { width: 52%; }
+    button { width: 20%; background: #0284c7; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+    button:hover { background: #0369a1; }
+  </style>
+</head>
+<body>
+
+  <h3>Onlayn Veb Chat</h3>
+  <div id="chat-box"></div>
+
+  <div class="controls">
+    <input type="text" id="username" placeholder="Ismingiz">
+    <input type="text" id="message" placeholder="Xabar yozing..." onkeypress="if(event.key==='Enter') sendMessage()">
+    <button onclick="sendMessage()">Yuborish</button>
+  </div>
+
+  <script>
+    // 1. Supabase ulanishi
+    const SUPABASE_URL = "https://yfvuidbtbuibgtnlqmqj.supabase.co";
+    const SUPABASE_KEY = "SIZNING_PUBLISHABLE_KEY"; // <-- Nusxalagan kalitni shu qo'shtirnoq ichiga qo'ying
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const chatBox = document.getElementById("chat-box");
+
+    // Ekranga xabar qo'shish funksiyasi
+    function renderMessage(msg) {
+      const div = document.createElement("div");
+      div.className = "msg";
+      div.innerHTML = `<b>${msg.user || "Mehmon"}</b>${msg.text}`;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // 2. Oldingi xabarlarni yuklab olish
+    async function loadMessages() {
+      const { data, error } = await db
+        .from("messages")
+        .select("*")
+        .order("id", { ascending: true });
+
+      if (error) {
+        console.error("Xatolik:", error);
+        return;
+      }
+      data.forEach(renderMessage);
+    }
+
+    // 3. Yangi xabar yuborish
+    async function sendMessage() {
+      const userInput = document.getElementById("username");
+      const msgInput = document.getElementById("message");
+      
+      const user = userInput.value.trim() || "Suxrob";
+      const text = msgInput.value.trim();
+      if (!text) return;
+
+      msgInput.value = "";
+      const { error } = await db.from("messages").insert([{ user, text }]);
+      if (error) alert("Xabar ketmadi: " + error.message);
+    }
+
+    // 4. Real-time tinglash (boshqa odam yozsa darhol chiqishi uchun)
+    db.channel("public:messages")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
+        renderMessage(payload.new);
+      })
+      .subscribe();
+
+    loadMessages();
+  </script>
+</body>
+</html>
