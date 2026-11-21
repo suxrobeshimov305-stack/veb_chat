@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Ideal Veb Chat</title>
+  <title>Universal Media Veb Chat</title>
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
   <style>
     :root {
@@ -56,12 +56,13 @@
 
     .app-container {
       width: 100%;
-      max-width: 900px;
+      max-width: 960px;
       height: 100dvh;
       background: var(--bg-app);
       display: flex;
       flex-direction: column;
       box-shadow: var(--shadow);
+      position: relative;
     }
 
     @media (min-width: 768px) {
@@ -91,15 +92,15 @@
       align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;
     }
 
-    .title-area h2 { font-size: 16px; font-weight: 600; }
+    .title-area h2 { font-size: 16px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .status-text { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; }
     .dot { width: 8px; height: 8px; border-radius: 50%; background: #f59e0b; display: inline-block; }
     .dot.online { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
 
-    .header-actions { display: flex; gap: 8px; flex-shrink: 0; }
+    .header-actions { display: flex; gap: 6px; flex-shrink: 0; }
     .icon-btn {
       background: var(--bg-input); border: 1px solid var(--border); color: var(--text-main);
-      padding: 7px 11px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 500;
+      padding: 7px 10px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 500;
     }
     .icon-btn:hover { border-color: var(--primary); color: var(--primary); }
 
@@ -111,10 +112,11 @@
       gap: 8px;
       align-items: center;
       font-size: 13px;
+      flex-wrap: wrap;
     }
     .room-bar input {
       background: var(--bg-input); border: 1px solid var(--border); color: var(--text-main);
-      padding: 6px 10px; border-radius: 8px; outline: none; font-size: 13px; max-width: 180px;
+      padding: 6px 10px; border-radius: 8px; outline: none; font-size: 13px; width: 150px;
     }
     .btn-sm {
       background: var(--primary); color: #fff; border: none; padding: 6px 12px;
@@ -123,15 +125,16 @@
 
     #chat-box {
       flex: 1; background: var(--bg-chat); padding: 16px; overflow-y: auto;
-      display: flex; flex-direction: column; gap: 10px; scroll-behavior: smooth;
+      display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth;
     }
 
     .sys-msg {
       align-self: center; background: rgba(148, 163, 184, 0.18); color: var(--text-muted);
-      font-size: 12px; padding: 5px 12px; border-radius: 20px; text-align: center;
+      font-size: 12px; padding: 5px 12px; border-radius: 20px; text-align: center; max-width: 90%;
     }
 
-    .msg-row { display: flex; flex-direction: column; max-width: 80%; animation: fadeIn 0.2s ease; }
+    .msg-row { display: flex; flex-direction: column; max-width: 82%; animation: fadeIn 0.2s ease; }
+    @media (min-width: 768px) { .msg-row { max-width: 68%; } }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
     .msg-row.me { align-self: flex-end; align-items: flex-end; }
@@ -145,19 +148,95 @@
     .me .bubble { background: var(--msg-me); color: var(--msg-me-text); border-bottom-right-radius: 4px; }
     .friend .bubble { background: var(--msg-friend); color: var(--msg-friend-text); border-bottom-left-radius: 4px; border: 1px solid var(--border); }
 
+    /* Stiker ko'rinishi */
+    .sticker-bubble {
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      padding: 2px 6px !important;
+    }
+    .sticker-emoji {
+      font-size: 64px;
+      line-height: 1.1;
+      display: block;
+      transition: transform 0.2s;
+    }
+    .sticker-emoji:hover { transform: scale(1.12); }
+    .sticker-bubble .msg-time { color: var(--text-muted); }
+
+    .bubble img, .bubble video {
+      max-width: 100%;
+      max-height: 280px;
+      border-radius: 10px;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .bubble audio {
+      max-width: 230px;
+      height: 36px;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .file-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 12px; border-radius: 10px;
+      background: rgba(0, 0, 0, 0.12); color: inherit;
+      text-decoration: none; font-size: 13px; font-weight: 500;
+    }
+
     .msg-time { font-size: 10px; opacity: 0.75; margin-top: 4px; text-align: right; display: block; }
 
+    /* Stikerlar paneli */
+    .sticker-panel {
+      background: var(--bg-header);
+      border-top: 1px solid var(--border);
+      padding: 10px 14px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+      gap: 6px;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+    .sticker-panel.hidden { display: none; }
+    .sticker-item {
+      font-size: 32px;
+      text-align: center;
+      padding: 6px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.15s;
+      user-select: none;
+    }
+    .sticker-item:hover { background: var(--bg-input); transform: scale(1.15); }
+
     .footer {
-      background: var(--bg-header); padding: 10px 14px; border-top: 1px solid var(--border);
-      display: flex; gap: 8px; align-items: center;
+      background: var(--bg-header); padding: 10px 12px; border-top: 1px solid var(--border);
+      display: flex; gap: 6px; align-items: center;
     }
-    .footer input {
+
+    .media-btn {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: var(--bg-input); border: 1px solid var(--border);
+      color: var(--text-main); display: flex; align-items: center; justify-content: center;
+      cursor: pointer; flex-shrink: 0; font-size: 17px; transition: 0.2s;
+    }
+    .media-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .media-btn.recording {
+      background: #ef4444; color: #fff; border-color: #ef4444;
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); } }
+
+    .footer input[type="text"] {
       background: var(--bg-input); border: 1px solid var(--border); color: var(--text-main);
-      border-radius: 22px; padding: 11px 16px; font-size: 15px; width: 100%; outline: none;
+      border-radius: 22px; padding: 10px 14px; font-size: 15px; width: 100%; outline: none;
     }
-    .footer input:focus { border-color: var(--primary); }
+    .footer input[type="text"]:focus { border-color: var(--primary); }
+
     .send-btn {
-      width: 44px; height: 44px; border-radius: 50%; background: var(--primary); color: white;
+      width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: white;
       border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;
     }
 
@@ -184,7 +263,7 @@
   <div class="modal-overlay" id="name-modal">
     <div class="modal-box">
       <h3>Chatga xush kelibsiz</h3>
-      <p>Ismingizni kiriting</p>
+      <p>Suhbatda ko‘rinadigan ismingizni kiriting</p>
       <input type="text" id="username-input" placeholder="Masalan: Suxrob" maxlength="20" onkeypress="if(event.key==='Enter') saveUsername()">
       <button class="btn-sm" onclick="saveUsername()">Kirish</button>
     </div>
@@ -216,10 +295,18 @@
 
     <div id="chat-box"></div>
 
+    <!-- Stikerlar paneli -->
+    <div class="sticker-panel hidden" id="sticker-panel"></div>
+
     <div class="footer">
-      <input type="text" id="msg" placeholder="Xabar yozing..." autocomplete="off" onkeypress="if(event.key==='Enter') sendMsg()">
-      <button class="send-btn" onclick="sendMsg()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+      <input type="file" id="file-input" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.zip" style="display:none" onchange="handleFileUpload(event)">
+      <button class="media-btn" onclick="document.getElementById('file-input').click()" title="Rasm, Video yoki Fayl">📎</button>
+      <button class="media-btn" onclick="toggleStickers()" title="Stikerlar">😊</button>
+      <button class="media-btn" id="mic-btn" onclick="toggleVoiceRecord()" title="Ovozli xabar">🎤</button>
+
+      <input type="text" id="msg" placeholder="Xabar yozing..." autocomplete="off" onkeypress="if(event.key==='Enter') sendTextMsg()">
+      <button class="send-btn" onclick="sendTextMsg()" title="Yuborish">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
       </button>
     </div>
   </div>
@@ -229,10 +316,30 @@
     const myClientId = "user_" + Math.random().toString(36).substring(2, 10);
     let currentRoom = "umumiy";
     let client = null;
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let isRecording = false;
+
+    const stickers = [
+      "😀", "😂", "🤣", "😍", "🥰", "😎", "🤩", "🥳",
+      "😭", "😱", "😡", "🤔", "😴", "🤯", "🫡", "🤗",
+      "👍", "👎", "👏", "🙌", "🤝", "🔥", "❤️", "💔",
+      "💯", "🎉", "🚀", "⚡", "👑", "⚽", "🏆", "🌹"
+    ];
 
     const chatBox = document.getElementById("chat-box");
     const statusDot = document.getElementById("status-dot");
     const statusLabel = document.getElementById("status-label");
+
+    // Stikerlar panelini to'ldirish
+    const stickerPanel = document.getElementById("sticker-panel");
+    stickers.forEach(emoji => {
+      const span = document.createElement("div");
+      span.className = "sticker-item";
+      span.innerText = emoji;
+      span.onclick = () => sendSticker(emoji);
+      stickerPanel.appendChild(span);
+    });
 
     if (localStorage.getItem("chat_theme") === "dark") {
       document.body.classList.add("dark");
@@ -253,16 +360,18 @@
     }
 
     function changeName() {
-      localStorage.removeItem("chat_username");
       document.getElementById("username-input").value = myName;
       document.getElementById("name-modal").classList.remove("hidden");
+    }
+
+    function toggleStickers() {
+      stickerPanel.classList.toggle("hidden");
     }
 
     function startChat() {
       document.getElementById("header-avatar").innerText = myName.charAt(0).toUpperCase();
       if (client) return;
 
-      // Bepul va tezkor WebSocket MQTT broker (hech qanday kalitsiz ishlaydi)
       client = mqtt.connect("wss://broker.emqx.io:8084/mqtt");
 
       client.on("connect", () => {
@@ -279,72 +388,196 @@
       client.on("message", (topic, payload) => {
         try {
           const data = JSON.parse(payload.toString());
-          if (data.clientId === myClientId) return; // O'zimiz yuborgan xabarni ikki marta chiqarmaslik
-          addMessage(data.text, "friend", data.sender, data.time);
+          if (data.clientId === myClientId) return;
+          renderMessage(data, "friend");
           playBeep();
         } catch (e) {}
       });
     }
 
     function subscribeRoom(roomName) {
-      const topic = "suxrob_veb_chat_2026/" + roomName.toLowerCase();
+      const topic = "suxrob_media_chat_2026/" + roomName.toLowerCase();
       client.subscribe(topic);
       document.getElementById("room-title").innerText = "Xona: #" + roomName;
-      addSysMsg(`"${roomName}" xonasiga ulandingiz. Shu xonadagi hamma xabarlaringizni ko‘radi.`);
+      addSysMsg(`"${roomName}" xonasiga ulandingiz. Matn, stiker, ovoz, rasm va video yuborishingiz mumkin.`);
     }
 
     function switchRoom() {
       const newRoom = document.getElementById("room-input").value.trim().replace(/\s+/g, "_");
       if (!newRoom || newRoom === currentRoom) return;
-      client.unsubscribe("suxrob_veb_chat_2026/" + currentRoom.toLowerCase());
+      client.unsubscribe("suxrob_media_chat_2026/" + currentRoom.toLowerCase());
       currentRoom = newRoom;
       chatBox.innerHTML = "";
       subscribeRoom(currentRoom);
     }
 
-    function sendMsg() {
+    function getTimeNow() {
+      const now = new Date();
+      return now.getHours().toString().padStart(2, "0") + ":" + now.getMinutes().toString().padStart(2, "0");
+    }
+
+    function publishPayload(dataObj) {
+      if (!client || !client.connected) {
+        alert("Serverga ulanish kutilmoqda...");
+        return false;
+      }
+      dataObj.clientId = myClientId;
+      dataObj.sender = myName;
+      dataObj.time = getTimeNow();
+      client.publish("suxrob_media_chat_2026/" + currentRoom.toLowerCase(), JSON.stringify(dataObj));
+      renderMessage(dataObj, "me");
+      return true;
+    }
+
+    function sendTextMsg() {
       const input = document.getElementById("msg");
       const text = input.value.trim();
       if (!text) return;
+      if (publishPayload({ type: "text", content: text })) {
+        input.value = "";
+        input.focus();
+      }
+    }
 
-      if (!client || !client.connected) {
-        alert("Internetga ulanish kutilmoqda...");
+    function sendSticker(emoji) {
+      publishPayload({ type: "sticker", content: emoji });
+      stickerPanel.classList.add("hidden");
+    }
+
+    // Ovozli xabar yozish va yuborish
+    async function toggleVoiceRecord() {
+      const micBtn = document.getElementById("mic-btn");
+      if (!isRecording) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          mediaRecorder = new MediaRecorder(stream);
+          audioChunks = [];
+
+          mediaRecorder.ondataavailable = e => {
+            if (e.data.size > 0) audioChunks.push(e.data);
+          };
+
+          mediaRecorder.onstop = () => {
+            const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              publishPayload({ type: "audio", content: reader.result });
+            };
+            reader.readAsDataURL(audioBlob);
+            stream.getTracks().forEach(track => track.stop());
+          };
+
+          mediaRecorder.start();
+          isRecording = true;
+          micBtn.classList.add("recording");
+          micBtn.innerText = "⏹️";
+        } catch (err) {
+          alert("Mikrofonga ruxsat berilmadi yoki qurilmada mikrofon topilmadi.");
+        }
+      } else {
+        mediaRecorder.stop();
+        isRecording = false;
+        micBtn.classList.remove("recording");
+        micBtn.innerText = "🎤";
+      }
+    }
+
+    // Rasm, Video va Fayl yuklash
+    function handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      if (file.size > 3 * 1024 * 1024) {
+        alert("Fayl hajmi 3 MB dan oshmasligi kerak!");
+        event.target.value = "";
         return;
       }
 
-      const now = new Date();
-      const timeStr = now.getHours().toString().padStart(2, "0") + ":" + now.getMinutes().toString().padStart(2, "0");
-
-      const payload = JSON.stringify({
-        clientId: myClientId,
-        sender: myName,
-        text: text,
-        time: timeStr
-      });
-
-      client.publish("suxrob_veb_chat_2026/" + currentRoom.toLowerCase(), payload);
-      addMessage(text, "me", myName, timeStr);
-      input.value = "";
-      input.focus();
+      if (file.type.startsWith("image/")) {
+        compressImage(file, (base64Img) => {
+          publishPayload({ type: "image", content: base64Img });
+        });
+      } else if (file.type.startsWith("video/")) {
+        const reader = new FileReader();
+        reader.onload = () => publishPayload({ type: "video", content: reader.result });
+        reader.readAsDataURL(file);
+      } else {
+        const reader = new FileReader();
+        reader.onload = () => publishPayload({ type: "file", content: reader.result, fileName: file.name });
+        reader.readAsDataURL(file);
+      }
+      event.target.value = "";
     }
 
-    function addMessage(text, who, sender, time) {
+    function compressImage(file, callback) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const maxW = 800;
+          const scale = img.width > maxW ? maxW / img.width : 1;
+          canvas.width = img.width * scale;
+          canvas.height = img.height * scale;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          callback(canvas.toDataURL("image/jpeg", 0.75));
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function renderMessage(data, who) {
       const row = document.createElement("div");
       row.className = "msg-row " + who;
 
       const nameEl = document.createElement("div");
       nameEl.className = "sender-name";
-      nameEl.innerText = who === "me" ? "Siz" : sender;
+      nameEl.innerText = who === "me" ? "Siz" : data.sender;
 
       const bubble = document.createElement("div");
       bubble.className = "bubble";
-      bubble.innerText = text;
+
+      if (data.type === "sticker") {
+        bubble.classList.add("sticker-bubble");
+        const span = document.createElement("span");
+        span.className = "sticker-emoji";
+        span.innerText = data.content;
+        bubble.appendChild(span);
+      } else if (data.type === "image") {
+        const img = document.createElement("img");
+        img.src = data.content;
+        bubble.appendChild(img);
+      } else if (data.type === "video") {
+        const vid = document.createElement("video");
+        vid.src = data.content;
+        vid.controls = true;
+        vid.playsInline = true;
+        bubble.appendChild(vid);
+      } else if (data.type === "audio") {
+        const aud = document.createElement("audio");
+        aud.src = data.content;
+        aud.controls = true;
+        bubble.appendChild(aud);
+      } else if (data.type === "file") {
+        const a = document.createElement("a");
+        a.href = data.content;
+        a.download = data.fileName || "fayl";
+        a.className = "file-link";
+        a.innerText = "📄 " + (data.fileName || "Faylni yuklab olish");
+        bubble.appendChild(a);
+      } else {
+        const p = document.createElement("span");
+        p.innerText = data.content;
+        bubble.appendChild(p);
+      }
 
       const timeEl = document.createElement("span");
       timeEl.className = "msg-time";
-      timeEl.innerText = time;
-
+      timeEl.innerText = data.time;
       bubble.appendChild(timeEl);
+
       row.appendChild(nameEl);
       row.appendChild(bubble);
       chatBox.appendChild(row);
