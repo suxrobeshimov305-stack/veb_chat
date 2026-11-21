@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Ideal Veb Chat</title>
-  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
   <style>
     :root {
       --bg-body: #e2e8f0;
@@ -42,7 +42,7 @@
       --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
 
     body {
       background: var(--bg-body);
@@ -52,7 +52,6 @@
       align-items: center;
       height: 100dvh;
       overflow: hidden;
-      transition: background 0.3s;
     }
 
     .app-container {
@@ -63,7 +62,6 @@
       display: flex;
       flex-direction: column;
       box-shadow: var(--shadow);
-      position: relative;
     }
 
     @media (min-width: 768px) {
@@ -75,7 +73,6 @@
       }
     }
 
-    /* Header */
     .header {
       background: var(--bg-header);
       padding: 12px 16px;
@@ -84,441 +81,225 @@
       justify-content: space-between;
       align-items: center;
       gap: 10px;
-      z-index: 10;
     }
 
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      min-width: 0;
-    }
-
+    .user-info { display: flex; align-items: center; gap: 10px; min-width: 0; }
     .avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
+      width: 40px; height: 40px; border-radius: 50%;
       background: linear-gradient(135deg, #0284c7, #38bdf8);
-      color: white;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      flex-shrink: 0;
+      color: white; font-weight: 700; display: flex;
+      align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;
     }
 
-    .title-area { min-width: 0; }
-    .title-area h2 { font-size: 16px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .title-area h2 { font-size: 16px; font-weight: 600; }
     .status-text { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; }
-    .dot { width: 8px; height: 8px; border-radius: 50%; background: #94a3b8; display: inline-block; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #f59e0b; display: inline-block; }
     .dot.online { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
 
     .header-actions { display: flex; gap: 8px; flex-shrink: 0; }
-
     .icon-btn {
-      background: var(--bg-input);
-      border: 1px solid var(--border);
-      color: var(--text-main);
-      padding: 8px 12px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      transition: 0.2s;
+      background: var(--bg-input); border: 1px solid var(--border); color: var(--text-main);
+      padding: 7px 11px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 500;
     }
     .icon-btn:hover { border-color: var(--primary); color: var(--primary); }
 
-    /* Connection Panel */
-    .connect-panel {
+    .room-bar {
       background: var(--bg-header);
-      padding: 12px 16px;
+      padding: 8px 16px;
       border-bottom: 1px solid var(--border);
       display: flex;
-      flex-wrap: wrap;
       gap: 8px;
       align-items: center;
-      justify-content: space-between;
-    }
-
-    .connect-panel.hidden { display: none; }
-
-    .id-badge {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--bg-input);
-      padding: 6px 10px;
-      border-radius: 8px;
-      border: 1px dashed var(--border);
       font-size: 13px;
-      flex: 1 1 240px;
-      justify-content: space-between;
+    }
+    .room-bar input {
+      background: var(--bg-input); border: 1px solid var(--border); color: var(--text-main);
+      padding: 6px 10px; border-radius: 8px; outline: none; font-size: 13px; max-width: 180px;
+    }
+    .btn-sm {
+      background: var(--primary); color: #fff; border: none; padding: 6px 12px;
+      border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px;
     }
 
-    .connect-form {
-      display: flex;
-      gap: 6px;
-      flex: 1 1 260px;
-    }
-
-    input {
-      background: var(--bg-input);
-      border: 1px solid var(--border);
-      color: var(--text-main);
-      padding: 9px 12px;
-      border-radius: 10px;
-      outline: none;
-      font-size: 14px;
-      width: 100%;
-      transition: 0.2s;
-    }
-    input:focus { border-color: var(--primary); }
-
-    .btn-primary {
-      background: var(--primary);
-      color: #fff;
-      border: none;
-      padding: 9px 16px;
-      border-radius: 10px;
-      font-weight: 600;
-      font-size: 14px;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: 0.2s;
-    }
-    .btn-primary:hover { background: var(--primary-hover); }
-
-    /* Chat Area */
     #chat-box {
-      flex: 1;
-      background: var(--bg-chat);
-      padding: 16px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      scroll-behavior: smooth;
+      flex: 1; background: var(--bg-chat); padding: 16px; overflow-y: auto;
+      display: flex; flex-direction: column; gap: 10px; scroll-behavior: smooth;
     }
 
     .sys-msg {
-      align-self: center;
-      background: rgba(148, 163, 184, 0.18);
-      color: var(--text-muted);
-      font-size: 12px;
-      padding: 5px 12px;
-      border-radius: 20px;
-      text-align: center;
-      max-width: 85%;
+      align-self: center; background: rgba(148, 163, 184, 0.18); color: var(--text-muted);
+      font-size: 12px; padding: 5px 12px; border-radius: 20px; text-align: center;
     }
 
-    .msg-row {
-      display: flex;
-      flex-direction: column;
-      max-width: 78%;
-      animation: fadeIn 0.2s ease;
-    }
-
-    @media (max-width: 600px) {
-      .msg-row { max-width: 86%; }
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    .msg-row { display: flex; flex-direction: column; max-width: 80%; animation: fadeIn 0.2s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
     .msg-row.me { align-self: flex-end; align-items: flex-end; }
     .msg-row.friend { align-self: flex-start; align-items: flex-start; }
 
-    .sender-name {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-bottom: 3px;
-      padding: 0 4px;
-    }
-
+    .sender-name { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; padding: 0 4px; }
     .bubble {
-      padding: 10px 14px;
-      border-radius: 16px;
-      font-size: 15px;
-      line-height: 1.4;
-      word-wrap: break-word;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.06);
-      position: relative;
+      padding: 10px 14px; border-radius: 16px; font-size: 15px; line-height: 1.4;
+      word-wrap: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.06);
     }
+    .me .bubble { background: var(--msg-me); color: var(--msg-me-text); border-bottom-right-radius: 4px; }
+    .friend .bubble { background: var(--msg-friend); color: var(--msg-friend-text); border-bottom-left-radius: 4px; border: 1px solid var(--border); }
 
-    .me .bubble {
-      background: var(--msg-me);
-      color: var(--msg-me-text);
-      border-bottom-right-radius: 4px;
-    }
+    .msg-time { font-size: 10px; opacity: 0.75; margin-top: 4px; text-align: right; display: block; }
 
-    .friend .bubble {
-      background: var(--msg-friend);
-      color: var(--msg-friend-text);
-      border-bottom-left-radius: 4px;
-      border: 1px solid var(--border);
-    }
-
-    .msg-time {
-      font-size: 10px;
-      opacity: 0.75;
-      margin-top: 4px;
-      text-align: right;
-      display: block;
-    }
-
-    /* Footer Input */
     .footer {
-      background: var(--bg-header);
-      padding: 10px 14px;
-      border-top: 1px solid var(--border);
-      display: flex;
-      gap: 8px;
-      align-items: center;
+      background: var(--bg-header); padding: 10px 14px; border-top: 1px solid var(--border);
+      display: flex; gap: 8px; align-items: center;
     }
-
     .footer input {
-      border-radius: 22px;
-      padding: 11px 16px;
-      font-size: 15px;
+      background: var(--bg-input); border: 1px solid var(--border); color: var(--text-main);
+      border-radius: 22px; padding: 11px 16px; font-size: 15px; width: 100%; outline: none;
     }
-
+    .footer input:focus { border-color: var(--primary); }
     .send-btn {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: var(--primary);
-      color: white;
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      flex-shrink: 0;
-      transition: 0.2s;
+      width: 44px; height: 44px; border-radius: 50%; background: var(--primary); color: white;
+      border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;
     }
-    .send-btn:hover { background: var(--primary-hover); transform: scale(1.04); }
 
-    /* Name Modal */
     .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.7);
-      backdrop-filter: blur(4px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-      padding: 16px;
+      position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center; z-index: 100; padding: 16px;
     }
     .modal-overlay.hidden { display: none; }
     .modal-box {
-      background: var(--bg-app);
-      padding: 24px;
-      border-radius: 16px;
-      width: 100%;
-      max-width: 360px;
-      text-align: center;
-      box-shadow: var(--shadow);
-      border: 1px solid var(--border);
+      background: var(--bg-app); padding: 24px; border-radius: 16px; width: 100%;
+      max-width: 350px; text-align: center; border: 1px solid var(--border);
     }
-    .modal-box h3 { margin-bottom: 8px; font-size: 18px; }
-    .modal-box p { color: var(--text-muted); font-size: 13px; margin-bottom: 16px; }
-    .modal-box input { margin-bottom: 12px; text-align: center; font-size: 16px; }
+    .modal-box h3 { margin-bottom: 8px; }
+    .modal-box p { color: var(--text-muted); font-size: 13px; margin-bottom: 14px; }
+    .modal-box input {
+      width: 100%; padding: 10px; border-radius: 10px; border: 1px solid var(--border);
+      background: var(--bg-input); color: var(--text-main); text-align: center; font-size: 16px; margin-bottom: 12px;
+    }
     .modal-box button { width: 100%; padding: 11px; }
-
-    /* Toast */
-    .toast {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #0f172a;
-      color: #fff;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 13px;
-      z-index: 200;
-      opacity: 0;
-      pointer-events: none;
-      transition: 0.3s;
-    }
-    .toast.show { opacity: 1; top: 28px; }
   </style>
 </head>
 <body>
 
-  <!-- Ism kiritish oynasi -->
   <div class="modal-overlay" id="name-modal">
     <div class="modal-box">
       <h3>Chatga xush kelibsiz</h3>
-      <p>Suhbatda ko‘rinadigan ismingizni kiriting</p>
+      <p>Ismingizni kiriting</p>
       <input type="text" id="username-input" placeholder="Masalan: Suxrob" maxlength="20" onkeypress="if(event.key==='Enter') saveUsername()">
-      <button class="btn-primary" onclick="saveUsername()">Davom etish</button>
+      <button class="btn-sm" onclick="saveUsername()">Kirish</button>
     </div>
   </div>
 
-  <div class="toast" id="toast">Nusxalandi!</div>
-
   <div class="app-container">
-    <!-- Yuqori panel -->
     <div class="header">
       <div class="user-info">
         <div class="avatar" id="header-avatar">S</div>
         <div class="title-area">
-          <h2 id="chat-title">Veb Chat</h2>
+          <h2 id="room-title">Umumiy Chat</h2>
           <div class="status-text">
             <span class="dot" id="status-dot"></span>
-            <span id="status-label">Ulanish kutilmoqda...</span>
+            <span id="status-label">Ulanmoqda...</span>
           </div>
         </div>
       </div>
       <div class="header-actions">
-        <button class="icon-btn" onclick="togglePanel()" title="Ulanish paneli">🔗 Ulashish</button>
-        <button class="icon-btn" onclick="toggleTheme()" id="theme-btn" title="Mavzu">🌙</button>
+        <button class="icon-btn" onclick="changeName()">✏️ Ism</button>
+        <button class="icon-btn" onclick="toggleTheme()" id="theme-btn">🌙</button>
       </div>
     </div>
 
-    <!-- ID va Ulanish paneli -->
-    <div class="connect-panel" id="connect-panel">
-      <div class="id-badge">
-        <span>ID: <b id="my-id">...</b></span>
-        <div style="display:flex; gap:5px;">
-          <button class="icon-btn" style="padding:4px 8px;" onclick="copyId()">Kod</button>
-          <button class="icon-btn" style="padding:4px 8px; color:var(--primary);" onclick="copyInviteLink()">Havola</button>
-        </div>
-      </div>
-      <div class="connect-form">
-        <input type="text" id="peer-id" placeholder="Do‘stingiz ID kodini kiriting">
-        <button class="btn-primary" onclick="connectPeer()">Ulanish</button>
-      </div>
+    <div class="room-bar">
+      <span>Xona:</span>
+      <input type="text" id="room-input" value="umumiy" placeholder="Xona nomi">
+      <button class="btn-sm" onclick="switchRoom()">O‘tish</button>
     </div>
 
-    <!-- Xabarlar oynasi -->
-    <div id="chat-box">
-      <div class="sys-msg">Do‘stingizga <b>Havola</b> tugmasi orqali link yuboring yoki ID kod orqali ulaning.</div>
-    </div>
+    <div id="chat-box"></div>
 
-    <!-- Xabar yozish qismi -->
     <div class="footer">
-      <input type="text" id="msg" placeholder="Xabar yozing..." autocomplete="off" oninput="handleTyping()" onkeypress="if(event.key==='Enter') sendMsg()">
-      <button class="send-btn" onclick="sendMsg()" title="Yuborish">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+      <input type="text" id="msg" placeholder="Xabar yozing..." autocomplete="off" onkeypress="if(event.key==='Enter') sendMsg()">
+      <button class="send-btn" onclick="sendMsg()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
       </button>
     </div>
   </div>
 
   <script>
     let myName = localStorage.getItem("chat_username") || "";
-    let friendName = "Suhbatdosh";
-    let peer = null;
-    let conn = null;
-    let myId = "";
-    let typingTimeout = null;
+    const myClientId = "user_" + Math.random().toString(36).substring(2, 10);
+    let currentRoom = "umumiy";
+    let client = null;
 
     const chatBox = document.getElementById("chat-box");
     const statusDot = document.getElementById("status-dot");
     const statusLabel = document.getElementById("status-label");
 
-    // Mavzuni tiklash
     if (localStorage.getItem("chat_theme") === "dark") {
       document.body.classList.add("dark");
       document.getElementById("theme-btn").innerText = "☀️";
     }
 
-    // Ismni tekshirish
     if (myName) {
       document.getElementById("name-modal").classList.add("hidden");
-      initPeer();
-    } else {
-      document.getElementById("username-input").focus();
+      startChat();
     }
 
     function saveUsername() {
       const val = document.getElementById("username-input").value.trim();
-      myName = val || "Foydalanuvchi";
+      myName = val || "Mehmon";
       localStorage.setItem("chat_username", myName);
       document.getElementById("name-modal").classList.add("hidden");
-      initPeer();
+      startChat();
     }
 
-    function initPeer() {
+    function changeName() {
+      localStorage.removeItem("chat_username");
+      document.getElementById("username-input").value = myName;
+      document.getElementById("name-modal").classList.remove("hidden");
+    }
+
+    function startChat() {
       document.getElementById("header-avatar").innerText = myName.charAt(0).toUpperCase();
-      peer = new Peer();
+      if (client) return;
 
-      peer.on("open", (id) => {
-        myId = id;
-        document.getElementById("my-id").innerText = id;
+      // Bepul va tezkor WebSocket MQTT broker (hech qanday kalitsiz ishlaydi)
+      client = mqtt.connect("wss://broker.emqx.io:8084/mqtt");
 
-        // URL orqali taklif havolasi bilan kirilgan bo'lsa avtomatik ulanish
-        const urlParams = new URLSearchParams(window.location.search);
-        const inviteId = urlParams.get("connect");
-        if (inviteId && inviteId !== id) {
-          document.getElementById("peer-id").value = inviteId;
-          connectPeer();
-        }
-      });
-
-      peer.on("connection", (connection) => {
-        conn = connection;
-        setupConnection();
-      });
-
-      peer.on("error", (err) => {
-        showToast("Ulanishda xatolik: " + err.type);
-      });
-    }
-
-    function connectPeer() {
-      const targetId = document.getElementById("peer-id").value.trim();
-      if (!targetId) return showToast("ID kodni kiriting!");
-      if (targetId === myId) return showToast("O‘zingizga ulana olmaysiz!");
-
-      statusLabel.innerText = "Ulanmoqda...";
-      conn = peer.connect(targetId);
-      setupConnection();
-    }
-
-    function setupConnection() {
-      conn.on("open", () => {
+      client.on("connect", () => {
         statusDot.classList.add("online");
         statusLabel.innerText = "Onlayn";
-        // O'z ismimizni suhbatdoshga yuboramiz
-        conn.send({ type: "intro", name: myName });
-        addSysMsg("Aloqa muvaffaqiyatli o‘rnatildi!");
-        if (window.innerWidth < 600) {
-          document.getElementById("connect-panel").classList.add("hidden");
-        }
+        subscribeRoom(currentRoom);
       });
 
-      conn.on("data", (data) => {
-        if (data.type === "intro") {
-          friendName = data.name;
-          document.getElementById("chat-title").innerText = friendName;
-          document.getElementById("header-avatar").innerText = friendName.charAt(0).toUpperCase();
-        } else if (data.type === "typing") {
-          statusLabel.innerText = "yozmoqda...";
-          clearTimeout(typingTimeout);
-          typingTimeout = setTimeout(() => {
-            statusLabel.innerText = "Onlayn";
-          }, 1500);
-        } else if (data.type === "chat") {
-          statusLabel.innerText = "Onlayn";
-          addMessage(data.text, "friend", data.sender || friendName, data.time);
-          playNotificationSound();
-        }
-      });
-
-      conn.on("close", () => {
+      client.on("reconnect", () => {
         statusDot.classList.remove("online");
-        statusLabel.innerText = "Aloqa uzildi";
-        addSysMsg("Suhbatdosh chatdan chiqdi.");
+        statusLabel.innerText = "Qayta ulanmoqda...";
       });
+
+      client.on("message", (topic, payload) => {
+        try {
+          const data = JSON.parse(payload.toString());
+          if (data.clientId === myClientId) return; // O'zimiz yuborgan xabarni ikki marta chiqarmaslik
+          addMessage(data.text, "friend", data.sender, data.time);
+          playBeep();
+        } catch (e) {}
+      });
+    }
+
+    function subscribeRoom(roomName) {
+      const topic = "suxrob_veb_chat_2026/" + roomName.toLowerCase();
+      client.subscribe(topic);
+      document.getElementById("room-title").innerText = "Xona: #" + roomName;
+      addSysMsg(`"${roomName}" xonasiga ulandingiz. Shu xonadagi hamma xabarlaringizni ko‘radi.`);
+    }
+
+    function switchRoom() {
+      const newRoom = document.getElementById("room-input").value.trim().replace(/\s+/g, "_");
+      if (!newRoom || newRoom === currentRoom) return;
+      client.unsubscribe("suxrob_veb_chat_2026/" + currentRoom.toLowerCase());
+      currentRoom = newRoom;
+      chatBox.innerHTML = "";
+      subscribeRoom(currentRoom);
     }
 
     function sendMsg() {
@@ -526,25 +307,25 @@
       const text = input.value.trim();
       if (!text) return;
 
-      if (!conn || !conn.open) {
-        showToast("Avval suhbatdoshga ulaning!");
-        document.getElementById("connect-panel").classList.remove("hidden");
+      if (!client || !client.connected) {
+        alert("Internetga ulanish kutilmoqda...");
         return;
       }
 
       const now = new Date();
       const timeStr = now.getHours().toString().padStart(2, "0") + ":" + now.getMinutes().toString().padStart(2, "0");
 
-      conn.send({ type: "chat", text: text, sender: myName, time: timeStr });
+      const payload = JSON.stringify({
+        clientId: myClientId,
+        sender: myName,
+        text: text,
+        time: timeStr
+      });
+
+      client.publish("suxrob_veb_chat_2026/" + currentRoom.toLowerCase(), payload);
       addMessage(text, "me", myName, timeStr);
       input.value = "";
       input.focus();
-    }
-
-    function handleTyping() {
-      if (conn && conn.open) {
-        conn.send({ type: "typing" });
-      }
     }
 
     function addMessage(text, who, sender, time) {
@@ -578,24 +359,6 @@
       chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    function copyId() {
-      if (!myId) return;
-      navigator.clipboard.writeText(myId);
-      showToast("ID kod nusxalandi!");
-    }
-
-    function copyInviteLink() {
-      if (!myId) return;
-      const baseUrl = window.location.origin + window.location.pathname;
-      const inviteUrl = `${baseUrl}?connect=${myId}`;
-      navigator.clipboard.writeText(inviteUrl);
-      showToast("Taklif havolasi nusxalandi! Do‘stingizga yuboring.");
-    }
-
-    function togglePanel() {
-      document.getElementById("connect-panel").classList.toggle("hidden");
-    }
-
     function toggleTheme() {
       document.body.classList.toggle("dark");
       const isDark = document.body.classList.contains("dark");
@@ -603,26 +366,17 @@
       localStorage.setItem("chat_theme", isDark ? "dark" : "light");
     }
 
-    function showToast(msg) {
-      const toast = document.getElementById("toast");
-      toast.innerText = msg;
-      toast.classList.add("show");
-      setTimeout(() => toast.classList.remove("show"), 2500);
-    }
-
-    // Yengil bildirishnoma ovozi (tashqi faylsiz)
-    function playNotificationSound() {
+    function playBeep() {
       try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(660, ctx.currentTime);
-        gain.gain.setValueAtTime(0.05, ctx.currentTime);
+        osc.frequency.setValueAtTime(600, ctx.currentTime);
+        gain.gain.setValueAtTime(0.04, ctx.currentTime);
         osc.connect(gain);
         gain.connect(ctx.destination);
         osc.start();
-        osc.stop(ctx.currentTime + 0.12);
+        osc.stop(ctx.currentTime + 0.1);
       } catch (e) {}
     }
   </script>
