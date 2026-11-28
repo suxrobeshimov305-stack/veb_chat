@@ -105,28 +105,40 @@
     }
     .icon-btn:hover { border-color: var(--primary); color: var(--primary); }
 
-    .users-drawer {
+    /* Hamma uchun doimiy ko'rinadigan Onlayn ishtirokchilar paneli */
+    .online-strip {
       background: var(--bg-header);
       border-bottom: 1px solid var(--border);
-      padding: 10px 16px;
+      padding: 8px 14px;
       display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
       align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+      white-space: nowrap;
+      scrollbar-width: none;
     }
-    .users-drawer.hidden { display: none; }
+    .online-strip::-webkit-scrollbar { display: none; }
+    .strip-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      flex-shrink: 0;
+    }
     .user-chip {
       background: var(--bg-input);
       border: 1px solid var(--border);
       padding: 4px 10px;
       border-radius: 20px;
       font-size: 12px;
+      font-weight: 500;
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      flex-shrink: 0;
     }
-    .online-dot { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; }
-    .offline-dot { width: 7px; height: 7px; border-radius: 50%; background: #94a3b8; }
+    .online-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 5px #22c55e; }
 
     .admin-bar {
       background: rgba(16, 185, 129, 0.08);
@@ -137,11 +149,12 @@
       align-items: center;
       font-size: 12px;
       justify-content: space-between;
+      flex-wrap: wrap;
     }
     .admin-bar.active { display: flex; }
     .admin-bar input {
       background: var(--bg-input); border: 1px solid var(--border); color: var(--text-main);
-      padding: 5px 8px; border-radius: 6px; outline: none; font-size: 12px; width: 120px;
+      padding: 5px 8px; border-radius: 6px; outline: none; font-size: 12px; width: 110px;
     }
     .btn-sm {
       background: var(--primary); color: #fff; border: none; padding: 6px 12px;
@@ -164,30 +177,65 @@
     }
     body.dark .admin-alert { color: #34d399; }
 
-    .msg-row { display: flex; flex-direction: column; max-width: 82%; animation: fadeIn 0.2s ease; }
+    .msg-row { display: flex; flex-direction: column; max-width: 84%; animation: fadeIn 0.2s ease; }
     @media (min-width: 768px) { .msg-row { max-width: 68%; } }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
     .msg-row.me { align-self: flex-end; align-items: flex-end; }
     .msg-row.friend { align-self: flex-start; align-items: flex-start; }
 
-    .sender-name { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; padding: 0 4px; }
-    .bubble-wrap { display: flex; align-items: center; gap: 6px; max-width: 100%; }
+    .sender-name { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; padding: 0 4px; font-weight: 600; }
+    .bubble-wrap { display: flex; align-items: center; gap: 4px; max-width: 100%; }
     .msg-row.me .bubble-wrap { flex-direction: row-reverse; }
 
     .bubble {
       padding: 10px 14px; border-radius: 16px; font-size: 15px; line-height: 1.4;
-      word-wrap: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+      word-wrap: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.06); position: relative;
     }
     .me .bubble { background: var(--msg-me); color: var(--msg-me-text); border-bottom-right-radius: 4px; }
     .friend .bubble { background: var(--msg-friend); color: var(--msg-friend-text); border-bottom-left-radius: 4px; border: 1px solid var(--border); }
 
-    .del-btn {
-      background: transparent; border: none; color: var(--text-muted);
-      cursor: pointer; font-size: 14px; padding: 4px; border-radius: 6px;
-      opacity: 0.65; transition: 0.15s; flex-shrink: 0;
+    /* Reply (Javob berish) bloki */
+    .quoted-msg {
+      background: rgba(0, 0, 0, 0.12);
+      border-left: 3px solid #38bdf8;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      margin-bottom: 6px;
+      opacity: 0.9;
     }
-    .del-btn:hover { opacity: 1; color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+    .friend .quoted-msg { background: rgba(2, 132, 199, 0.08); border-left-color: var(--primary); }
+    .quoted-sender { font-weight: 700; display: block; font-size: 11px; }
+
+    /* Reaksiyalar */
+    .reactions-bar {
+      display: flex;
+      gap: 4px;
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+    .reaction-badge {
+      background: var(--bg-header);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2px 7px;
+      font-size: 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .msg-actions { display: flex; flex-direction: column; gap: 2px; }
+    .act-btn {
+      background: transparent; border: none; color: var(--text-muted);
+      cursor: pointer; font-size: 13px; padding: 3px; border-radius: 6px;
+      opacity: 0.6; transition: 0.15s;
+    }
+    .act-btn:hover { opacity: 1; background: rgba(148, 163, 184, 0.15); }
+    .act-btn.del:hover { color: #ef4444; }
 
     .sticker-bubble {
       background: transparent !important; border: none !important; box-shadow: none !important; padding: 2px 6px !important;
@@ -206,6 +254,29 @@
     }
 
     .msg-time { font-size: 10px; opacity: 0.75; margin-top: 4px; text-align: right; display: block; }
+
+    /* Typing indikatori */
+    .typing-bar {
+      padding: 4px 16px;
+      font-size: 12px;
+      color: var(--primary);
+      font-style: italic;
+      background: var(--bg-chat);
+      min-height: 22px;
+    }
+
+    /* Reply preview paneli */
+    .reply-preview {
+      background: var(--bg-header);
+      border-top: 1px solid var(--border);
+      padding: 8px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+    }
+    .reply-preview.hidden { display: none; }
+    .reply-preview-text { border-left: 3px solid var(--primary); padding-left: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
     .sticker-panel {
       background: var(--bg-header); border-top: 1px solid var(--border); padding: 10px 14px;
@@ -245,21 +316,24 @@
     }
 
     .modal-overlay {
-      position: fixed; inset: 0; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(6px);
+      position: fixed; inset: 0; background: rgba(15, 23, 42, 0.88); backdrop-filter: blur(6px);
       display: flex; align-items: center; justify-content: center; z-index: 100; padding: 16px;
     }
     .modal-overlay.hidden { display: none; }
     .modal-box {
-      background: var(--bg-app); padding: 24px; border-radius: 16px; width: 100%;
+      background: var(--bg-app); padding: 26px; border-radius: 18px; width: 100%;
       max-width: 360px; text-align: center; border: 1px solid var(--border);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
     }
-    .modal-box h3 { margin-bottom: 8px; }
-    .modal-box p { color: var(--text-muted); font-size: 13px; margin-bottom: 14px; }
+    .modal-box h3 { margin-bottom: 8px; font-size: 20px; }
+    .modal-box p { color: var(--text-muted); font-size: 13px; margin-bottom: 16px; }
     .modal-box input {
-      width: 100%; padding: 11px; border-radius: 10px; border: 1px solid var(--border);
+      width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border);
       background: var(--bg-input); color: var(--text-main); text-align: center; font-size: 16px; margin-bottom: 12px;
+      outline: none;
     }
-    .modal-box button { width: 100%; padding: 11px; }
+    .modal-box input:focus { border-color: var(--primary); }
+    .modal-box button { width: 100%; padding: 12px; font-size: 15px; }
     .admin-toggle {
       margin-top: 14px; font-size: 12px; color: var(--text-muted); cursor: pointer; display: inline-block;
     }
@@ -267,17 +341,19 @@
 </head>
 <body>
 
+  <!-- Ism kiritish oynasi -->
   <div class="modal-overlay" id="name-modal">
     <div class="modal-box">
-      <h3>Guruhga qo‘shilish</h3>
-      <p>Guruhda ko‘rinishi uchun o‘z ismingizni yozing</p>
-      <input type="text" id="username-input" placeholder="Ismingiz (masalan: Jasur)" maxlength="25" onkeypress="if(event.key==='Enter') joinGroupForever()">
-      <button class="btn-sm" onclick="joinGroupForever()">Guruhga qo‘shilish</button>
-      <div class="admin-toggle" onclick="activateAdmin()" id="admin-status-link">👑 Admin</div>
+      <h3>👋 Chatga xush kelibsiz!</h3>
+      <p>Guruh ishtirokchilari sizni tanishi uchun ismingizni kiriting:</p>
+      <input type="text" id="username-input" placeholder="Ismingizni yozing..." maxlength="25" onkeypress="if(event.key==='Enter') joinGroup()">
+      <button class="btn-sm" onclick="joinGroup()">Chatga kirish</button>
+      <div class="admin-toggle" onclick="activateAdmin()" id="admin-status-link">👑 Admin kirishi</div>
     </div>
   </div>
 
   <div class="app-container">
+    <!-- Sarlavha -->
     <div class="header">
       <div class="user-info">
         <div class="avatar" id="header-avatar">G</div>
@@ -290,33 +366,53 @@
         </div>
       </div>
       <div class="header-actions">
-        <button class="icon-btn" onclick="toggleUsersDrawer()" title="Guruh a'zolari">👥 <span id="online-count">1</span></button>
+        <button class="icon-btn" onclick="changeMyName()" title="Ismni o'zgartirish">✏️ <span id="my-name-badge">Ism</span></button>
         <button class="icon-btn" onclick="toggleTheme()" id="theme-btn" title="Mavzu">🌙</button>
       </div>
     </div>
 
-    <div class="users-drawer hidden" id="users-drawer"></div>
+    <!-- Hamma uchun ko'rinadigan Onlayn ishtirokchilar ro'yxati -->
+    <div class="online-strip" id="online-strip">
+      <span class="strip-label">🟢 Onlayn (<span id="online-count">1</span>):</span>
+      <div id="online-users-list" style="display:flex; gap:6px;"></div>
+    </div>
 
+    <!-- Admin paneli -->
     <div class="admin-bar" id="admin-bar">
       <span>👑 Admin nazorati</span>
-      <div style="display:flex; gap:5px;">
+      <div style="display:flex; gap:5px; flex-wrap:wrap;">
         <input type="text" id="room-input" value="umumiy" placeholder="Xona">
         <button class="btn-sm" style="padding:4px 8px; font-size:12px;" onclick="switchRoom()">O‘tish</button>
-        <button class="btn-sm" style="padding:4px 8px; font-size:12px; background:#ef4444;" onclick="clearMembersList()" title="Ro'yxatni tozalash">Tozalash</button>
+        <button class="btn-sm" style="padding:4px 8px; font-size:12px; background:#ef4444;" onclick="clearChatHistory()">Tarixni tozalash</button>
       </div>
     </div>
 
+    <!-- Xabarlar maydoni -->
     <div id="chat-box"></div>
 
+    <!-- Kim yozayotganini ko'rsatish -->
+    <div class="typing-bar" id="typing-bar"></div>
+
+    <!-- Reply (Javob berish) oynasi -->
+    <div class="reply-preview hidden" id="reply-preview">
+      <div class="reply-preview-text">
+        <strong id="reply-to-name" style="color:var(--primary); font-size:11px;"></strong>
+        <div id="reply-to-text" style="color:var(--text-muted); font-size:12px;"></div>
+      </div>
+      <button class="act-btn" onclick="cancelReply()" style="font-size:16px;">✖</button>
+    </div>
+
+    <!-- Stikerlar paneli -->
     <div class="sticker-panel hidden" id="sticker-panel"></div>
 
+    <!-- Xabar yozish qismi -->
     <div class="footer">
       <input type="file" id="file-input" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.zip" style="display:none" onchange="handleFileUpload(event)">
       <button class="media-btn" onclick="document.getElementById('file-input').click()" title="Rasm, Video yoki Fayl">📎</button>
       <button class="media-btn" onclick="toggleStickers()" title="Stikerlar">😊</button>
       <button class="media-btn" id="mic-btn" onclick="toggleVoiceRecord()" title="Ovozli xabar">🎤</button>
 
-      <input type="text" id="msg" placeholder="Xabar yozing..." autocomplete="off" onkeypress="if(event.key==='Enter') sendTextMsg()">
+      <input type="text" id="msg" placeholder="Xabar yozing..." autocomplete="off" oninput="handleTyping()" onkeypress="if(event.key==='Enter') sendTextMsg()">
       <button class="send-btn" onclick="sendTextMsg()" title="Yuborish">
         <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
       </button>
@@ -325,38 +421,28 @@
 
   <script>
     const ADMIN_PASS = "2026";
+    const TOPIC_PREFIX = "suxrob_live_group_chat_2026/";
     let isAdmin = localStorage.getItem("chat_is_admin") === "true";
 
-    // Eski "Mehmon" xotirasini tozalash
-    if (localStorage.getItem("chat_username") === "Mehmon") {
-      localStorage.removeItem("chat_username");
-    }
-
-    let myName = localStorage.getItem("chat_locked_username") || "";
-    if (myName.toLowerCase() === "mehmon") {
-      myName = "";
-      localStorage.removeItem("chat_locked_username");
-    }
-
-    let myClientId = localStorage.getItem("chat_permanent_id");
+    let myName = localStorage.getItem("chat_user_name") || "";
+    let myClientId = sessionStorage.getItem("chat_tab_id");
     if (!myClientId) {
-      myClientId = "member_" + Date.now() + "_" + Math.random().toString(36).substring(2, 7);
-      localStorage.setItem("chat_permanent_id", myClientId);
+      myClientId = "usr_" + Date.now() + "_" + Math.random().toString(36).substring(2, 7);
+      sessionStorage.setItem("chat_tab_id", myClientId);
     }
 
-    let currentRoom = localStorage.getItem("chat_locked_room") || "umumiy";
+    let currentRoom = localStorage.getItem("chat_room") || "umumiy";
     let client = null;
     let mediaRecorder = null;
     let audioChunks = [];
     let isRecording = false;
+    let replyContext = null;
+    let lastTypingSent = 0;
+    let typingUsers = {};
 
-    // A'zolar ro'yxatidan eski "Mehmon" yozuvlarini olib tashlash
-    let groupMembers = JSON.parse(localStorage.getItem("chat_group_members") || "{}");
-    for (const id in groupMembers) {
-      if (!groupMembers[id].name || groupMembers[id].name.toLowerCase().includes("mehmon")) {
-        delete groupMembers[id];
-      }
-    }
+    // Faqat hozir onlayn turgan foydalanuvchilar ro'yxati
+    let activeUsers = {};
+    let messageHistory = JSON.parse(localStorage.getItem("chat_history_" + currentRoom) || "[]");
 
     const stickers = [
       "😀", "😂", "🤣", "😍", "🥰", "😎", "🤩", "🥳",
@@ -369,18 +455,7 @@
     const statusDot = document.getElementById("status-dot");
     const statusLabel = document.getElementById("status-label");
 
-    window.addEventListener("beforeunload", (e) => {
-      if (myName && !isAdmin) {
-        e.preventDefault();
-        e.returnValue = "Siz guruh a'zosisiz. Chiqishni tasdiqlaysizmi?";
-      }
-    });
-
-    history.pushState(null, null, location.href);
-    window.onpopstate = function () {
-      history.go(1);
-    };
-
+    // Stikerlarni chizish
     const stickerPanel = document.getElementById("sticker-panel");
     stickers.forEach(emoji => {
       const span = document.createElement("div");
@@ -410,7 +485,7 @@
         isAdmin = true;
         localStorage.setItem("chat_is_admin", "true");
         updateAdminUI();
-        alert("Admin rejimi faollashtirildi!");
+        alert("Admin rejimi yoqildi!");
       } else if (pass !== null) {
         alert("Parol noto‘g‘ri!");
       }
@@ -425,51 +500,62 @@
       }
     }
 
-    function clearMembersList() {
-      if (!isAdmin) return;
-      groupMembers = {};
-      groupMembers[myClientId] = { name: myName + " (Siz)", lastSeen: Date.now(), online: true };
-      saveAndRenderMembers();
-      announcePresence("ping");
-    }
-
-    function joinGroupForever() {
+    function joinGroup() {
       const val = document.getElementById("username-input").value.trim();
       if (val.length < 2) {
-        alert("Iltimos, kamida 2 ta harfdan iborat haqiqiy ismingizni yozing!");
-        return;
-      }
-      if (val.toLowerCase() === "mehmon") {
-        alert("Iltimos, o‘z ismingizni kiriting!");
+        alert("Iltimos, kamida 2 ta harfdan iborat ismingizni yozing!");
         return;
       }
       myName = val;
-      localStorage.setItem("chat_locked_username", myName);
-      localStorage.setItem("chat_locked_room", currentRoom);
+      localStorage.setItem("chat_user_name", myName);
       document.getElementById("name-modal").classList.add("hidden");
       startChat();
+    }
+
+    function changeMyName() {
+      const newName = prompt("Yangi ismingizni kiriting:", myName);
+      if (newName && newName.trim().length >= 2) {
+        const oldName = myName;
+        myName = newName.trim();
+        localStorage.setItem("chat_user_name", myName);
+        updateMyHeaderUI();
+        activeUsers[myClientId] = { name: myName, lastSeen: Date.now() };
+        renderOnlineUsers();
+        announcePresence("join");
+        publishSystemNotice(`${oldName} ismini "${myName}" ga o‘zgartirdi`);
+      }
+    }
+
+    function updateMyHeaderUI() {
+      document.getElementById("header-avatar").innerText = myName.charAt(0).toUpperCase();
+      document.getElementById("my-name-badge").innerText = myName;
     }
 
     function toggleStickers() {
       stickerPanel.classList.toggle("hidden");
     }
 
-    function toggleUsersDrawer() {
-      document.getElementById("users-drawer").classList.toggle("hidden");
-    }
-
     function startChat() {
-      document.getElementById("header-avatar").innerText = myName.charAt(0).toUpperCase();
-      groupMembers[myClientId] = { name: myName + " (Siz)", lastSeen: Date.now(), online: true };
-      saveAndRenderMembers();
+      updateMyHeaderUI();
+      activeUsers[myClientId] = { name: myName, lastSeen: Date.now() };
+      renderOnlineUsers();
+      loadSavedHistory();
 
       if (client) return;
 
-      client = mqtt.connect("wss://broker.emqx.io:8084/mqtt");
+      // Chiqib ketayotganda boshqalarga xabar berish (Last Will)
+      client = mqtt.connect("wss://broker.emqx.io:8084/mqtt", {
+        will: {
+          topic: TOPIC_PREFIX + currentRoom.toLowerCase(),
+          payload: JSON.stringify({ type: "leave", clientId: myClientId, sender: myName }),
+          qos: 0,
+          retain: false
+        }
+      });
 
       client.on("connect", () => {
         statusDot.classList.add("online");
-        statusLabel.innerText = "Guruhda (Onlayn)";
+        statusLabel.innerText = "Onlayn";
         subscribeRoom(currentRoom);
       });
 
@@ -482,60 +568,111 @@
         try {
           const data = JSON.parse(payload.toString());
 
-          if (data.type === "delete") {
-            const targetRow = document.getElementById("msg_" + data.msgId);
-            if (targetRow) targetRow.remove();
+          // 1. Foydalanuvchi chiqib ketdi
+          if (data.type === "leave") {
+            if (activeUsers[data.clientId]) {
+              const leftName = activeUsers[data.clientId].name;
+              delete activeUsers[data.clientId];
+              renderOnlineUsers();
+              addSysMsg(`${leftName} chatdan chiqdi`);
+            }
             return;
           }
 
+          // 2. Kimlar onlayn ekanligini aniqlash (Presence)
           if (data.type === "presence") {
             if (data.clientId === myClientId) return;
-            const validName = (data.sender && data.sender.trim()) ? data.sender.trim() : "Foydalanuvchi";
-            const isBrandNew = !groupMembers[data.clientId];
-            const wasOffline = groupMembers[data.clientId] && !groupMembers[data.clientId].online;
+            const isNewArrival = !activeUsers[data.clientId];
+            activeUsers[data.clientId] = { name: data.sender, lastSeen: Date.now() };
+            renderOnlineUsers();
 
-            groupMembers[data.clientId] = { name: validName, lastSeen: Date.now(), online: true };
-            saveAndRenderMembers();
-
-            if (data.action === "join" || isBrandNew || wasOffline) {
-              announcePresence("ping");
-              if (isAdmin) {
-                const statusWord = isBrandNew ? "guruhga yangi qo‘shildi" : "guruhga kirdi";
-                addAdminAlert(`👑 ${validName} ${statusWord} (${getTimeNow()})`);
+            // Yangi odam kirganda unga o'zimizni ko'rsatamiz va hammaga bildiramiz
+            if (data.action === "join" || isNewArrival) {
+              announcePresence("pong");
+              if (data.action === "join") {
+                addSysMsg(`🟢 ${data.sender} chatga qo‘shildi`);
                 playBeep();
               }
             }
             return;
           }
 
+          // 3. Yozmoqda... (Typing)
+          if (data.type === "typing") {
+            if (data.clientId === myClientId) return;
+            typingUsers[data.sender] = Date.now();
+            updateTypingUI();
+            return;
+          }
+
+          // 4. Xabar o'chirish
+          if (data.type === "delete") {
+            const targetRow = document.getElementById("msg_" + data.msgId);
+            if (targetRow) targetRow.remove();
+            removeFromHistory(data.msgId);
+            return;
+          }
+
+          // 5. Reaksiya qo'shish
+          if (data.type === "reaction") {
+            applyReactionUI(data.msgId, data.emoji);
+            return;
+          }
+
+          // 6. Tizim xabari (ism o'zgarishi va h.k.)
+          if (data.type === "sys") {
+            if (data.clientId !== myClientId) addSysMsg(data.content);
+            return;
+          }
+
+          // 7. Oddiy yoki media xabar
           if (data.clientId === myClientId) return;
-          const senderName = (data.sender && data.sender.trim()) ? data.sender.trim() : "Foydalanuvchi";
-          groupMembers[data.clientId] = { name: senderName, lastSeen: Date.now(), online: true };
-          saveAndRenderMembers();
-          renderMessage({ ...data, sender: senderName }, "friend");
+
+          // Xabar yuborgan odamni ham onlayn ro'yxatida yangilab qo'yamiz
+          activeUsers[data.clientId] = { name: data.sender, lastSeen: Date.now() };
+          renderOnlineUsers();
+
+          delete typingUsers[data.sender];
+          updateTypingUI();
+
+          renderMessage(data, "friend");
+          saveToHistory(data);
           playBeep();
         } catch (e) {}
       });
 
+      // Har 6 soniyada "men onlaynman" signali yuborish va 18 soniya jim qolganlarni o'chirish
       setInterval(() => {
         if (client && client.connected) {
+          activeUsers[myClientId] = { name: myName, lastSeen: Date.now() };
           announcePresence("ping");
         }
         const now = Date.now();
-        let changed = false;
-        for (const id in groupMembers) {
-          if (id !== myClientId && groupMembers[id].online && now - groupMembers[id].lastSeen > 25000) {
-            groupMembers[id].online = false;
-            changed = true;
+        let listChanged = false;
+        for (const id in activeUsers) {
+          if (id !== myClientId && now - activeUsers[id].lastSeen > 18000) {
+            delete activeUsers[id];
+            listChanged = true;
           }
         }
-        if (changed) saveAndRenderMembers();
-      }, 8000);
+        if (listChanged) renderOnlineUsers();
+        updateTypingUI();
+      }, 6000);
     }
+
+    window.addEventListener("beforeunload", () => {
+      if (client && client.connected && myName) {
+        client.publish(TOPIC_PREFIX + currentRoom.toLowerCase(), JSON.stringify({
+          type: "leave",
+          clientId: myClientId,
+          sender: myName
+        }));
+      }
+    });
 
     function announcePresence(action) {
       if (!client || !client.connected || !myName) return;
-      client.publish("suxrob_permanent_group_2026/" + currentRoom.toLowerCase(), JSON.stringify({
+      client.publish(TOPIC_PREFIX + currentRoom.toLowerCase(), JSON.stringify({
         type: "presence",
         action: action,
         clientId: myClientId,
@@ -543,47 +680,94 @@
       }));
     }
 
-    function saveAndRenderMembers() {
-      localStorage.setItem("chat_group_members", JSON.stringify(groupMembers));
-      const drawer = document.getElementById("users-drawer");
+    // Hamma ishtirokchilarga ko'rinadigan onlayn ro'yxatni chizish
+    function renderOnlineUsers() {
+      const container = document.getElementById("online-users-list");
       const countEl = document.getElementById("online-count");
-      drawer.innerHTML = "";
-      const ids = Object.keys(groupMembers);
-      const onlineCount = ids.filter(id => groupMembers[id].online).length;
-      countEl.innerText = `${onlineCount}/${ids.length}`;
+      container.innerHTML = "";
+
+      const ids = Object.keys(activeUsers);
+      countEl.innerText = ids.length;
 
       ids.forEach(id => {
-        const m = groupMembers[id];
+        const user = activeUsers[id];
         const chip = document.createElement("div");
         chip.className = "user-chip";
-        const dotClass = m.online ? "online-dot" : "offline-dot";
-        chip.innerHTML = `<span class="${dotClass}"></span><span>${m.name}</span>`;
-        drawer.appendChild(chip);
+        const isMe = id === myClientId;
+        chip.innerHTML = `<span class="online-dot"></span><span>${user.name}${isMe ? " (Siz)" : ""}</span>`;
+        container.appendChild(chip);
       });
     }
 
+    function handleTyping() {
+      const now = Date.now();
+      if (now - lastTypingSent > 2500 && client && client.connected) {
+        lastTypingSent = now;
+        client.publish(TOPIC_PREFIX + currentRoom.toLowerCase(), JSON.stringify({
+          type: "typing",
+          clientId: myClientId,
+          sender: myName
+        }));
+      }
+    }
+
+    function updateTypingUI() {
+      const now = Date.now();
+      const activeTypers = [];
+      for (const name in typingUsers) {
+        if (now - typingUsers[name] < 3500) {
+          activeTypers.push(name);
+        } else {
+          delete typingUsers[name];
+        }
+      }
+      const bar = document.getElementById("typing-bar");
+      if (activeTypers.length === 1) {
+        bar.innerText = `${activeTypers[0]} yozmoqda...`;
+      } else if (activeTypers.length > 1) {
+        bar.innerText = `${activeTypers.join(", ")} yozmoqda...`;
+      } else {
+        bar.innerText = "";
+      }
+    }
+
     function subscribeRoom(roomName) {
-      const topic = "suxrob_permanent_group_2026/" + roomName.toLowerCase();
+      const topic = TOPIC_PREFIX + roomName.toLowerCase();
       client.subscribe(topic);
       document.getElementById("room-title").innerText = "Guruh: #" + roomName;
       announcePresence("join");
-      addSysMsg(`Siz "${roomName}" guruhining doimiy a'zosisiz.`);
+      addSysMsg(`Siz "${roomName}" chatiga kirdingiz.`);
     }
 
     function switchRoom() {
       if (!isAdmin) return;
       const newRoom = document.getElementById("room-input").value.trim().replace(/\s+/g, "_");
       if (!newRoom || newRoom === currentRoom) return;
-      client.unsubscribe("suxrob_permanent_group_2026/" + currentRoom.toLowerCase());
+      client.unsubscribe(TOPIC_PREFIX + currentRoom.toLowerCase());
       currentRoom = newRoom;
-      localStorage.setItem("chat_locked_room", currentRoom);
+      localStorage.setItem("chat_room", currentRoom);
+      activeUsers = { [myClientId]: { name: myName, lastSeen: Date.now() } };
+      renderOnlineUsers();
       chatBox.innerHTML = "";
+      messageHistory = JSON.parse(localStorage.getItem("chat_history_" + currentRoom) || "[]");
+      loadSavedHistory();
       subscribeRoom(currentRoom);
     }
 
     function getTimeNow() {
       const now = new Date();
       return now.getHours().toString().padStart(2, "0") + ":" + now.getMinutes().toString().padStart(2, "0");
+    }
+
+    function publishSystemNotice(text) {
+      addSysMsg(text);
+      if (client && client.connected) {
+        client.publish(TOPIC_PREFIX + currentRoom.toLowerCase(), JSON.stringify({
+          type: "sys",
+          clientId: myClientId,
+          content: text
+        }));
+      }
     }
 
     function publishPayload(dataObj) {
@@ -595,17 +779,96 @@
       dataObj.clientId = myClientId;
       dataObj.sender = myName;
       dataObj.time = getTimeNow();
-      client.publish("suxrob_permanent_group_2026/" + currentRoom.toLowerCase(), JSON.stringify(dataObj));
+      if (replyContext) {
+        dataObj.replyTo = replyContext;
+        cancelReply();
+      }
+      client.publish(TOPIC_PREFIX + currentRoom.toLowerCase(), JSON.stringify(dataObj));
       renderMessage(dataObj, "me");
+      saveToHistory(dataObj);
       return true;
+    }
+
+    // Xabarlar tarixini saqlash va yuklash
+    function saveToHistory(msgObj) {
+      // Juda katta media fayllarni localStorage to'lib qolmasligi uchun cheklaymiz
+      if (msgObj.content && msgObj.content.length > 200000) return;
+      messageHistory.push(msgObj);
+      if (messageHistory.length > 60) messageHistory.shift();
+      try {
+        localStorage.setItem("chat_history_" + currentRoom, JSON.stringify(messageHistory));
+      } catch (e) {}
+    }
+
+    function removeFromHistory(msgId) {
+      messageHistory = messageHistory.filter(m => m.msgId !== msgId);
+      localStorage.setItem("chat_history_" + currentRoom, JSON.stringify(messageHistory));
+    }
+
+    function loadSavedHistory() {
+      messageHistory.forEach(msg => {
+        const who = msg.sender === myName ? "me" : "friend";
+        renderMessage(msg, who);
+      });
+    }
+
+    function clearChatHistory() {
+      if (!isAdmin) return;
+      if (!confirm("Lokal xabarlar tarixini tozalaysizmi?")) return;
+      messageHistory = [];
+      localStorage.removeItem("chat_history_" + currentRoom);
+      chatBox.innerHTML = "";
+      addSysMsg("Xabarlar tarixi tozalandi.");
+    }
+
+    function setReply(sender, previewText) {
+      replyContext = { sender: sender, text: previewText.substring(0, 60) };
+      document.getElementById("reply-to-name").innerText = "↩️ " + sender;
+      document.getElementById("reply-to-text").innerText = replyContext.text;
+      document.getElementById("reply-preview").classList.remove("hidden");
+      document.getElementById("msg").focus();
+    }
+
+    function cancelReply() {
+      replyContext = null;
+      document.getElementById("reply-preview").classList.add("hidden");
+    }
+
+    function sendReaction(msgId, emoji) {
+      applyReactionUI(msgId, emoji);
+      if (client && client.connected) {
+        client.publish(TOPIC_PREFIX + currentRoom.toLowerCase(), JSON.stringify({
+          type: "reaction",
+          msgId: msgId,
+          emoji: emoji
+        }));
+      }
+    }
+
+    function applyReactionUI(msgId, emoji) {
+      const bar = document.getElementById("react_" + msgId);
+      if (!bar) return;
+      let badge = bar.querySelector(`[data-emoji="${emoji}"]`);
+      if (badge) {
+        const countSpan = badge.querySelector(".r-cnt");
+        countSpan.innerText = parseInt(countSpan.innerText) + 1;
+      } else {
+        badge = document.createElement("span");
+        badge.className = "reaction-badge";
+        badge.setAttribute("data-emoji", emoji);
+        badge.innerHTML = `${emoji} <span class="r-cnt">1</span>`;
+        badge.onclick = () => sendReaction(msgId, emoji);
+        bar.appendChild(badge);
+      }
     }
 
     function deleteMessage(msgId) {
       if (!confirm("Bu xabarni hamma uchun o‘chirasizmi?")) return;
       const el = document.getElementById("msg_" + msgId);
       if (el) el.remove();
+      removeFromHistory(msgId);
       if (client && client.connected) {
-        client.publish("suxrob_permanent_group_2026/" + currentRoom.toLowerCase(), JSON.stringify({
+        client.publish(TOPIC_PREFIX + currentRoom.toLowerCase(), JSON.stringify({
           type: "delete",
           msgId: msgId
         }));
@@ -660,8 +923,8 @@
     function handleFileUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
-      if (file.size > 3 * 1024 * 1024) {
-        alert("Fayl hajmi 3 MB dan oshmasligi kerak!");
+      if (file.size > 1.5 * 1024 * 1024) {
+        alert("Fayl hajmi 1.5 MB dan oshmasligi kerak!");
         event.target.value = "";
         return;
       }
@@ -705,7 +968,7 @@
 
       const nameEl = document.createElement("div");
       nameEl.className = "sender-name";
-      nameEl.innerText = who === "me" ? "Siz" : data.sender;
+      nameEl.innerText = who === "me" ? `${myName} (Siz)` : data.sender;
 
       const bubbleWrap = document.createElement("div");
       bubbleWrap.className = "bubble-wrap";
@@ -713,27 +976,40 @@
       const bubble = document.createElement("div");
       bubble.className = "bubble";
 
+      // Reply qilingan xabar bo'lsa ko'rsatish
+      if (data.replyTo) {
+        const qBox = document.createElement("div");
+        qBox.className = "quoted-msg";
+        qBox.innerHTML = `<span class="quoted-sender">${data.replyTo.sender}</span>${data.replyTo.text}`;
+        bubble.appendChild(qBox);
+      }
+
+      let summaryText = "Media xabar";
       if (data.type === "sticker") {
         bubble.classList.add("sticker-bubble");
         const span = document.createElement("span");
         span.className = "sticker-emoji";
         span.innerText = data.content;
         bubble.appendChild(span);
+        summaryText = data.content;
       } else if (data.type === "image") {
         const img = document.createElement("img");
         img.src = data.content;
         bubble.appendChild(img);
+        summaryText = "🖼️ Rasm";
       } else if (data.type === "video") {
         const vid = document.createElement("video");
         vid.src = data.content;
         vid.controls = true;
         vid.playsInline = true;
         bubble.appendChild(vid);
+        summaryText = "🎥 Video";
       } else if (data.type === "audio") {
         const aud = document.createElement("audio");
         aud.src = data.content;
         aud.controls = true;
         bubble.appendChild(aud);
+        summaryText = "🎤 Ovozli xabar";
       } else if (data.type === "file") {
         const a = document.createElement("a");
         a.href = data.content;
@@ -741,10 +1017,12 @@
         a.className = "file-link";
         a.innerText = "📄 " + (data.fileName || "Faylni yuklab olish");
         bubble.appendChild(a);
+        summaryText = "📄 " + (data.fileName || "Fayl");
       } else {
         const p = document.createElement("span");
         p.innerText = data.content;
         bubble.appendChild(p);
+        summaryText = data.content;
       }
 
       const timeEl = document.createElement("span");
@@ -754,17 +1032,44 @@
 
       bubbleWrap.appendChild(bubble);
 
-      if ((who === "me" || isAdmin) && data.msgId) {
-        const delBtn = document.createElement("button");
-        delBtn.className = "del-btn";
-        delBtn.innerText = "🗑️";
-        delBtn.title = "Xabarni hamma uchun o‘chirish";
-        delBtn.onclick = () => deleteMessage(data.msgId);
-        bubbleWrap.appendChild(delBtn);
+      // Xabar yonidagi tugmalar (Javob berish, Reaksiya, O'chirish)
+      if (data.msgId) {
+        const actionsDiv = document.createElement("div");
+        actionsDiv.className = "msg-actions";
+
+        const replyBtn = document.createElement("button");
+        replyBtn.className = "act-btn";
+        replyBtn.innerText = "↩️";
+        replyBtn.title = "Javob berish";
+        replyBtn.onclick = () => setReply(data.sender, summaryText);
+        actionsDiv.appendChild(replyBtn);
+
+        const likeBtn = document.createElement("button");
+        likeBtn.className = "act-btn";
+        likeBtn.innerText = "❤️";
+        likeBtn.title = "Reaksiya";
+        likeBtn.onclick = () => sendReaction(data.msgId, "❤️");
+        actionsDiv.appendChild(likeBtn);
+
+        if (who === "me" || isAdmin) {
+          const delBtn = document.createElement("button");
+          delBtn.className = "act-btn del";
+          delBtn.innerText = "🗑️";
+          delBtn.title = "O‘chirish";
+          delBtn.onclick = () => deleteMessage(data.msgId);
+          actionsDiv.appendChild(delBtn);
+        }
+
+        bubbleWrap.appendChild(actionsDiv);
       }
+
+      const reactBar = document.createElement("div");
+      reactBar.className = "reactions-bar";
+      if (data.msgId) reactBar.id = "react_" + data.msgId;
 
       row.appendChild(nameEl);
       row.appendChild(bubbleWrap);
+      row.appendChild(reactBar);
       chatBox.appendChild(row);
       chatBox.scrollTop = chatBox.scrollHeight;
     }
@@ -772,14 +1077,6 @@
     function addSysMsg(text) {
       const div = document.createElement("div");
       div.className = "sys-msg";
-      div.innerText = text;
-      chatBox.appendChild(div);
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
-
-    function addAdminAlert(text) {
-      const div = document.createElement("div");
-      div.className = "admin-alert";
       div.innerText = text;
       chatBox.appendChild(div);
       chatBox.scrollTop = chatBox.scrollHeight;
